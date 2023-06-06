@@ -1,7 +1,8 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
-page = Blueprint(__name__, "homepage")
+page = Blueprint(__name__)
 
+#Funzione che rappresenta ciò che sarà mostrato nella homepage
 @page.route("/")
 def home():
-    return "Hello F1 supporter!"
+    return render_template("index.html")
