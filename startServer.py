@@ -15,23 +15,28 @@ try:
 except ConnectionFailure:
     print("Failed to connect to MongoDB.")
 
-collection = db["Drivers"] # Sostituisci "nome_collezione" con il nome effettivo della collezione # Recupera tutti gli elementi dalla collezione
-elements = collection.find() # Stampa gli elementi for element in elements: 
-print(elements)
+#collection = db["Drivers"] # Sostituisci "nome_collezione" con il nome effettivo della collezione # Recupera tutti gli elementi dalla collezione
+#elements = collection.find() # Stampa gli elementi for element in elements: 
+#print(elements)
 
-for element in elements: 
-    content = element["forename"] # Sostituisci "campo_contenuto" con il nome del campo che contiene il contenuto print(content)
-    print(content)
+#for element in elements: 
+#    content = element["forename"] # Sostituisci "campo_contenuto" con il nome del campo che contiene il contenuto print(content)
+#    print(content)
 
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route('/allDrivers', methods=['GET'])
-def get_drivers():
+@app.route('/loadSeason') #, methods=['GET']
+def get_seasons():
     #request.form.get()
-    return render_template("allDrivers.html")
+    seasons = db["Seasons"]
+    elements = seasons.find()
+    years = list()
+    for e in elements:
+        years.append(e["year"])
+    return render_template("driversxSeason.html", s=years)
 
 
 if __name__ == "__main__":

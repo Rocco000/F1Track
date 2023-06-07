@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1Track</title>
+    <link rel="stylesheet" type="text/css" href="../static/cssStyles/cssFormDrivers.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <form action="/getDrivers" method="GET">
+                <h2>Search the drivers for season</h2>
+                <br>
+                <label for="year-select">Insert the year of the season:</label>
+                <br>
+                <select id="year-select" name="year">
+                    {%for year in s%}
+                        <option value="{{year}}">{{year}}</option>
+                    {%endfor%}
+                </select>
+                <br>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+</body>
+</html>
