@@ -36,7 +36,20 @@ def get_seasons():
     years = list()
     for e in elements:
         years.append(e["year"])
+    years.sort(reverse=True)
     return render_template("driversxSeason.html", s=years)
+
+@app.route('/constructors')
+def get_constructors():
+    seasons = db["Seasons"]
+    elements = seasons.find()
+    years = list()
+    for e in elements:
+        years.append(e["year"])
+    years.sort(reverse=True)
+    return render_template("constructorsxSeason.html",s=years)
+
+
 
 
 if __name__ == "__main__":
