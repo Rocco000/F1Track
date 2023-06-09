@@ -9,14 +9,6 @@
     <!--Bootstrap css-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <!--links per far aprire la tendina verso il basso-->
-    <!-- Includi il foglio di stile CSS di Select2 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <!-- Includi jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Includi il file JavaScript di Select2 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
     <style>
         body{
             margin: 0;
@@ -68,13 +60,6 @@
                             <option value="{{year}}">{{year}}</option>
                             {%endfor%}
                         </select>
-                        <script>
-                            $(document).ready(function() {
-                              $('#year_select').select2({
-                                dropdownDirection: 'below' // Imposta la tendina per aprirsi verso il basso
-                              });
-                            });
-                        </script>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
