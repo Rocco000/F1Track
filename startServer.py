@@ -38,12 +38,12 @@ def home():
     return render_template("index.html")
 
 @app.route('/loadSeason') #, methods=['GET']
-def loadDrivers():
+def load_data_drivers():
     years=get_seasons()
-    return render_template("driversSection.html", s=years)
+    return render_template("drivers_section.html", s=years)
 
 @app.route('/getDrivers', methods=['GET'])
-def getDriversSeason():
+def get_drivers_season():
     season = int(request.args.get("year"))
     print("Season: ",season)
     result = db['Races'].aggregate([
@@ -109,13 +109,75 @@ def getDriversSeason():
         code = doc["_id"]["code"]
         result_list.append({'name': name, 'surname': surname, 'code':code})
 
-    return render_template("driversSeason.html", result_drivers=result_list)
+    return render_template("drivers_season.html", result_drivers=result_list)
 
 
-@app.route('/constructors')
-def get_constructors():
+@app.route('/loadConstructors')
+def load_data_constructors():
     years=get_seasons()
-    return render_template("constructorsxSeason.html",s=years)
+    return render_template("constructors_season.html",s=years)
+
+@app.route('/getConstructors')
+def get_constructors():
+    season = int(request.args.get("year"))
+    print("Season: ",season)
+    result=db['Races'].aggregate([
+        {
+            '$match':{
+                'year':season
+            }
+        },
+        {
+           '$limit' : 1
+        },
+        {
+            '$lookup':{
+                'from':'Results',
+                'localField':'raceId',
+                'foreignField':'raceId',
+                'as':'race'
+            }
+        },
+        {
+            '$unwind':'$race'
+        },
+        {
+            '$project': {
+                'constructorId': '$race.constructorId'
+            }
+        },
+        {
+            '$lookup':{
+                'from':'Constructors',
+                'localField':'constructorId',
+                'foreignField':'constructorId',
+                'as':'constructors'
+            }
+        },
+        {
+            '$unwind':'$constructors'
+        },
+        {
+            '$project': {
+                'name': '$constructors.name',
+                'nationality':'$constructors.nationality'
+            }
+        },
+        {
+            '$group':{
+                '_id':{
+                    'name':'$name'
+                }
+            }
+        } 
+    ])
+    print("Risultati ottenuti")
+    print(result)
+    doc = next(result)
+    print("Doc 1: ",doc)
+    for doc in result:
+        print(doc)
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
