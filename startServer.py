@@ -15,13 +15,6 @@ try:
 except ConnectionFailure:
     print("Failed to connect to MongoDB.")
 
-#collection = db["Drivers"] # Sostituisci "nome_collezione" con il nome effettivo della collezione # Recupera tutti gli elementi dalla collezione
-#elements = collection.find() # Stampa gli elementi for element in elements: 
-#print(elements)
-
-#for element in elements: 
-#    content = element["forename"] # Sostituisci "campo_contenuto" con il nome del campo che contiene il contenuto print(content)
-#    print(content)
 
 def get_seasons():
     #request.form.get()
@@ -179,43 +172,19 @@ def get_constructors():
         print(doc)
     return render_template("index.html")
 
+@app.route('/getCircuits')
+def get_circuits():
+    result = db["Circuits"].find()
+    return render_template("circuits_page.html", result_circuits=result)
+
+@app.route('/getRaces')
+def get_races():
+    years=get_seasons()
+    return render_template("races_page.html", s=years)
+
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
 
-
-#        {
-#            '$lookup': {    
-#                'from': 'Qualifying',
-#                'localField': 'raceId',
-#                'foreignField': 'raceId',
-#                'as': 'qualify_season'
-#            }
-#        }
-#        {
-#            '$unwind': '$qualify_season'
-#        },
-#        {
-#            '$project': {
-#                'drivers_qualify_season': '$qualify_season.driverId'
-#            }
-#        },
-#        {
-#            '$lookup': {
-#                'from': 'Drivers',
-#                'localField': 'drivers_qualify_season',
-#                'foreignField': 'driverId',
-#                'as': 'drivers_season'
-#            }
-#        },
-#        {
-#            '$unwind': '$drivers_season'
-#        },
-#        {
-#            '$project': {
-#                'drivers_name': '$drivers_season.name',
-#                'drivers_surname': '$drivers_season.surname'
-#            }
-#        }
 
 #Per i metodi POST:
 # request.form.get("nomecampo")
