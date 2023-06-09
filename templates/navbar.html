@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>F1Track</title>
+        <style>
+            /* CSS styles for the iframe container */
+        /* Style the navbar */
+            .navbar {
+                background-color: black;
+                overflow: hidden;
+                width: 100%;
+                position: fixed;
+                top: 0;
+                z-index: 999;
+                padding-left: 0px;
+                height: 50px;
+                border: none;
+            }
+            
+            /* Style the navbar links */
+            .navbar a {
+                float: left;
+                display: block;
+                color: #f2f2f2;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+            
+            /* Style the navbar logo */
+            .navbar img {
+                height: 30px;
+                margin-right: 10px;
+                vertical-align: middle;
+            }
+
+            /* Change color on hover */
+            .navbar a:hover {
+                background-color: #ddd;
+                color: black;
+            }
+            
+        </style>
+    </head>    
+    <body>
+        <div class="navbar">
+        <a href="/">
+            <img src="../static/images/car2.png" alt="Logo">
+            F1Track
+        </a>
+        <a href="#">Races</a>
+        <a href="#">Charts</a>
+        <a href="/loadSeason">Drivers</a>
+        <a href="#">Circuits</a>
+        <a href="/constructors">Constructors</a>
+        <a href="#">Insert</a>
+        <a href="#">Delete</a>
+        </div>
+    </body>
+</html>

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F1Track</title>
-    <link rel="stylesheet" type="text/css" href="../static/cssStyles/cssFormDrivers.css">
+    <link rel="stylesheet" type="text/css" href="../static/cssStyles/cssConstructors.css">
 
     <!--links per far aprire la tendina verso il basso-->
     <!-- Includi il foglio di stile CSS di Select2 -->
@@ -28,7 +28,7 @@
     {% include 'navbar.html' %}
     <div class="container">
         <form action="/getDrivers" method="GET">
-            <h2>Search the drivers for season</h2>
+            <h2>Search the constructors for season</h2>
             <br>
             <label for="year-select">Select the season:</label>
             <select class="form-control" id="year-select" name="year">
