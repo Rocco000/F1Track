@@ -23,12 +23,6 @@ except ConnectionFailure:
 #    content = element["forename"] # Sostituisci "campo_contenuto" con il nome del campo che contiene il contenuto print(content)
 #    print(content)
 
-
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-@app.route('/loadSeason') #, methods=['GET']
 def get_seasons():
     #request.form.get()
     seasons = db["Seasons"]
@@ -37,6 +31,15 @@ def get_seasons():
     for e in elements:
         years.append(e["year"])
     years.sort(reverse=True)
+    return years
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route('/loadSeason') #, methods=['GET']
+def loadDrivers():
+    years=get_seasons()
     return render_template("driversxSeason.html", s=years)
 
 @app.route('/getDrivers', methods=['GET'])
@@ -106,6 +109,11 @@ def getDriversSeason():
         print(doc)
     return render_template("index.html")
 
+
+@app.route('/constructors')
+def get_constructors():
+    years=get_seasons()
+    return render_template("constructorsxSeason.html",s=years)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
