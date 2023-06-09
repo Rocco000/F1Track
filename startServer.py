@@ -36,6 +36,8 @@ def get_seasons():
         return render_template("constructors_season.html",s=years)
     elif page== "races":
         return render_template("races_page.html", s=years)
+    elif page== "charts":
+        return render_template("charts_season.html", s=years)
     else:
         return render_template("index.html")
 
@@ -153,14 +155,16 @@ def get_constructors():
         {
             '$project': {
                 'name': '$constructors.name',
-                'nationality':'$constructors.nationality'
+                'nationality':'$constructors.nationality',
+                'url':'$constructors.url'
             }
         },
         {
             '$group':{
                 '_id':{
                     'name':'$name',
-                    'nationality': '$nationality'
+                    'nationality': '$nationality',
+                    'url':'$url'
                 }
             }
         } 
@@ -169,13 +173,26 @@ def get_constructors():
     for doc in result:
         name = doc["_id"]["name"]
         nationality=doc["_id"]["nationality"]
-        result_list.append({'name': name, 'nationality': nationality})
+        url=doc["_id"]["url"]
+        result_list.append({'name': name, 'nationality': nationality, 'url': url})
     return render_template("constructors_listing.html", result_constructors=result_list)
 
 @app.route('/getCircuits')
 def get_circuits():
     result = db["Circuits"].find()
     return render_template("circuits_page.html", result_circuits=result)
+
+@app.route('/getCharts')
+def get_charts():
+    season = int(request.args.get("year"))
+    result =db["Results"].aggregate([
+        {
+            '$match':{
+                'year':season
+            }
+        }
+    ])
+    return render_template("index.html")
 
 
 if __name__ == "__main__":
