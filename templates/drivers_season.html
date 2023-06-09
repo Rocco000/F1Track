@@ -6,35 +6,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F1Track</title>
 
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+
+        .background-image {
+            background-image: url("../static/images/drivers_img.png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            height: 100vh;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            border: 1px solid #e9e9e9;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 400px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+
     <!--Bootstrap css-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
     {% include 'navbar.html' %}
-    <dev class="container">
-      <table class="table">
-          <thead class="thead-dark">
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Surname</th>
-              <th scope="col">Code</th>
-            </tr>
-          </thead>
-          <tbody>
-            {%
-            for driver in result_drivers
-            %}
-              <tr>
-                <td>{{driver.name}}</td>
-                <td>{{driver.surname}}</td>
-                <td>{{driver.code}}</td>
-              </tr>
-            {%
-            endfor
-            %}
-          </tbody>
-      </table>
-    </dev>
+    <div class="background-image">
+        <div class="container">
+            <div class="form-container">
+                <h2>Search drivers for season</h2>
+                <form action="/getDrivers" method="GET">
+                    <div class="form-group">
+                        <label for="year-select">Select the season:</label>
+                        <select class="form-control" id="year-select" name="year">
+                            {%for year in s%}
+                            <option value="{{year}}">{{year}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
     {% include 'footer.html' %}
 
     <!--Script Bootstrap-->

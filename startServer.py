@@ -40,7 +40,7 @@ def home():
 @app.route('/loadSeason') #, methods=['GET']
 def load_data_drivers():
     years=get_seasons()
-    return render_template("drivers_section.html", s=years)
+    return render_template("drivers_season.html", s=years)
 
 @app.route('/getDrivers', methods=['GET'])
 def get_drivers_season():
@@ -109,7 +109,7 @@ def get_drivers_season():
         code = doc["_id"]["code"]
         result_list.append({'name': name, 'surname': surname, 'code':code})
 
-    return render_template("drivers_season.html", result_drivers=result_list)
+    return render_template("drivers_listing.html", result_drivers=result_list)
 
 
 @app.route('/loadConstructors')
@@ -166,18 +166,18 @@ def get_constructors():
         {
             '$group':{
                 '_id':{
-                    'name':'$name'
+                    'name':'$name',
+                    'nationality': '$nationality'
                 }
             }
         } 
     ])
-    print("Risultati ottenuti")
-    print(result)
-    doc = next(result)
-    print("Doc 1: ",doc)
+    result_list = list()
     for doc in result:
-        print(doc)
-    return render_template("index.html")
+        name = doc["_id"]["name"]
+        nationality=doc["_id"]["nationality"]
+        result_list.append({'name': name, 'nationality': nationality})
+    return render_template("constructors_listing.html", result_constructors=result_list)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
