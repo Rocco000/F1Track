@@ -16,24 +16,29 @@ except ConnectionFailure:
     print("Failed to connect to MongoDB.")
 
 
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
+@app.route("/getSeasons")
 def get_seasons():
-    #request.form.get()
+    page = request.args.get('page')  # Get the value of the 'page' parameter from the URL
     seasons = db["Seasons"]
     elements = seasons.find()
     years = list()
     for e in elements:
         years.append(e["year"])
     years.sort(reverse=True)
-    return years
+    if page== "drivers":
+        return render_template("drivers_season.html", s=years)
+    elif page== "constructors":
+        return render_template("constructors_season.html",s=years)
+    elif page== "races":
+        return render_template("races_page.html", s=years)
+    else:
+        return render_template("index.html")
 
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-@app.route('/loadSeason') #, methods=['GET']
-def load_data_drivers():
-    years=get_seasons()
-    return render_template("drivers_season.html", s=years)
 
 @app.route('/getDrivers', methods=['GET'])
 def get_drivers_season():
@@ -105,11 +110,6 @@ def get_drivers_season():
     return render_template("drivers_listing.html", result_drivers=result_list)
 
 
-@app.route('/loadConstructors')
-def load_data_constructors():
-    years=get_seasons()
-    return render_template("constructors_season.html",s=years)
-
 @app.route('/getConstructors')
 def get_constructors():
     season = int(request.args.get("year"))
@@ -177,10 +177,6 @@ def get_circuits():
     result = db["Circuits"].find()
     return render_template("circuits_page.html", result_circuits=result)
 
-@app.route('/getRaces')
-def get_races():
-    years=get_seasons()
-    return render_template("races_page.html", s=years)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
