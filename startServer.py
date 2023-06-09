@@ -40,7 +40,7 @@ def home():
 @app.route('/loadSeason') #, methods=['GET']
 def loadDrivers():
     years=get_seasons()
-    return render_template("driversxSeason.html", s=years)
+    return render_template("driversSection.html", s=years)
 
 @app.route('/getDrivers', methods=['GET'])
 def getDriversSeason():
@@ -101,13 +101,15 @@ def getDriversSeason():
              '$sort': { "_id.surname": 1 }
         }
     ])
-    print("Risultati ottenuti dalla join:")
-    print(result)
-    doc = next(result)
-    print("Doc 1: ",doc)
+
+    result_list = list()
     for doc in result:
-        print(doc)
-    return render_template("index.html")
+        name = doc["_id"]["name"]
+        surname = doc["_id"]["surname"]
+        code = doc["_id"]["code"]
+        result_list.append({'name': name, 'surname': surname, 'code':code})
+
+    return render_template("driversSeason.html", result_drivers=result_list)
 
 
 @app.route('/constructors')
