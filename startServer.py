@@ -465,6 +465,34 @@ def get_result():
         results.append(doc)
     return render_template("result_list.html", result_race=results)
 
+@app.route('/sortSearch', methods=["GET"])
+def sortSearch():
+    topic = request.args.get("topic")
+    match topic:
+        case "drivers":
+            return render_template("search_drivers.html")
+        case "constructors":
+            return render_template("")
+        case "races":
+            return render_template("")
+        case "circuits":
+            return render_template("")
+        case _:
+            return render_template("index.html")
+
+@app.route('/driversSearch', methods=["GET"])
+def drivers_search():
+    field = request.args.get("field")
+    value = request.args.get("value")
+    if value is None or len(value.strip())==0:
+        return render_template("index.html")
+    else:  
+        if field!="name" and field!="surname" and field!="nationality":
+            return render_template("index.html")
+        else:
+            result = db["Drivers"].find({field:value})
+            result_list = list(result)
+            return render_template("search_result_drivers.html", result_drivers=result_list) 
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
