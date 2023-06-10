@@ -5,13 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F1Track</title>
-
+    <style>
+      body{
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
     <!--Bootstrap css-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
     {% include 'navbar.html' %}
-    <dev class="container">
+    <dev class="container" style="margin-top: 20px;">
       <table class="table">
           <thead class="thead-dark">
             <tr>
@@ -31,7 +37,7 @@
                 <td>{{driver.name}}</td>
                 <td>{{driver.surname}}</td>
                 <td>{{driver.code}}</td>
-                <td>{{driver.birthDate[:10]}}</td>
+                <td>{{driver.birthDate}}</td>
                 <td>{{driver.nationality}}</td>
                 <td><a href="/{{driver.url}}">click_to_info</a></td>
                 </tr>

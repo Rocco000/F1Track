@@ -468,8 +468,12 @@ def get_result():
         results.append(doc)
     return render_template("result_list.html", result_race=results)
 
+@app.route('/searchPage',methods=["GET"])
+def load_search_page():
+    return render_template("search_page.html")
+
 @app.route('/sortSearch', methods=["GET"])
-def sortSearch():
+def sort_search():
     topic = request.args.get("topic")
     match topic:
         case "drivers":
@@ -494,7 +498,12 @@ def drivers_search():
             return render_template("index.html")
         else:
             result = db["Drivers"].find({field:value})
-            result_list = list(result)
+            result_list_app = list(result)
+            result_list = list()
+            for document in result_list_app:
+                str_app = str(document["birthDate"])
+                document["birthDate"] = str_app[:10]
+                result_list.append(document)
             return render_template("search_result_drivers.html", result_drivers=result_list) 
 
 @app.route('/loginPage',methods=["GET"])
