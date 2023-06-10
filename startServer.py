@@ -107,7 +107,9 @@ def get_drivers_season():
     for doc in result:
         name = doc["_id"]["name"]
         surname = doc["_id"]["surname"]
-        code = doc["_id"]["code"]
+        code=""
+        if "code" in doc["_id"]:
+            code = doc["_id"]["code"]
         result_list.append({'name': name, 'surname': surname, 'code':code})
 
     return render_template("drivers_listing.html", result_drivers=result_list)
@@ -186,14 +188,82 @@ def get_circuits():
 @app.route('/getCharts')
 def get_charts():
     season = int(request.args.get("year"))
-    result =db["Results"].aggregate([
+    result =db["Races"].aggregate([
         {
             '$match':{
                 'year':season
             }
-        }
+        },
+        {
+            '$project':{
+                'raceId':'$raceId'
+            }
+        },
+        {
+            '$lookup':{
+                'from': 'Results',
+                'localField':'raceId',
+                'foreignField':'raceId',
+                'as':'races_for_season',
+            }
+        },
+        {
+            '$unwind': '$races_for_season'
+        },
+        {
+            '$project':{
+                'driverId':'$races_for_season.driverId',
+                'points':'$races_for_season.points'
+            }
+        },
+        {
+            '$lookup':{
+                'from': 'Drivers',
+                'localField':'driverId',
+                'foreignField':'driverId',
+                'as':'driver_results',
+            }
+        },
+        {
+            '$unwind': '$driver_results'
+        },
+        {
+            '$project':{
+                'name':'$driver_results.name',
+                'surname':'$driver_results.surname',
+                'code':'$driver_results.code',
+                'points':'$points'
+            }
+        },
+        {
+            '$group':{
+                '_id':{
+                    'name':'$name',
+                    'surname':'$surname',
+                    'code':'$code'
+                }, 
+                'totalPoints':{
+                    '$sum' : '$points'
+                } 
+
+            }
+        },
+        {
+            '$sort': {
+                'totalPoints':-1
+            }
+        } 
     ])
-    return render_template("index.html")
+    result_list = list()
+    for doc in result:
+        name = doc["_id"]["name"]
+        surname=doc["_id"]["surname"]
+        code=""
+        if "code" in doc["_id"]:
+            code=doc["_id"]["code"]
+        points=doc["totalPoints"]
+        result_list.append({'code': code, 'name': name, 'surname': surname, 'points': points})
+    return render_template("chart_listing.html",result_chart=result_list)
 
 @app.route('/getRaces', methods=["GET"])
 def get_races():
