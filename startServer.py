@@ -376,6 +376,34 @@ def get_qualification():
     return render_template("qualification_round_list.html", qualification_race= qualification)
 
 
+@app.route('/loginPage',methods=["GET"])
+def login():
+    return render_template("login.html")
+
+
+@app.route('/loginCheck')
+def login_check():
+    username= str(request.args.get("username"))
+    password= str(request.args.get("password"))
+    result=db["Users"].aggregate([
+        {
+            '$match':{'username':username}
+        },
+        {
+            '$match': {'password':password}
+        },
+        {
+            '$project':{
+                'username':'$username',
+                'password':'$password'
+            }
+        }
+    ])
+    if result.alive:
+        return render_template("index.html")
+    return render_template("login.html")
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
 
