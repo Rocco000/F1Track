@@ -243,6 +243,64 @@ def get_races():
 
     return render_template("races_list.html",races_season=races)
 
+@app.route('/getQualification', methods=["GET"])
+def get_qualification():
+    race = int(request.args.get("race"))
+    result = db["Qualifying"].aggregate([
+        {
+            '$match':{'raceId':race}
+        },
+        {
+            '$lookup':{
+                'from':'Drivers',
+                'localField':'driverId',
+                'foreignField':'driverId',
+                'as':'drivers_qualify' 
+            }
+        },
+        {
+            '$unwind':'$drivers_qualify'
+        },
+        {
+            '$project':{
+                'name':'$drivers_qualify.name',
+                'surname':'$drivers_qualify.surname',
+                'code':'$drivers_qualify.code',
+                'constructorId':'$constructorId',
+                'q1':'$q1',
+                'q2':'$q2',
+                'q3':'$q3',
+                'position':'$position'
+            }
+        },
+        {
+            '$lookup':{
+                'from':'Constructors',
+                'localField':'constructorId',
+                'foreignField':'constructorId',
+                'as':'drivers_constructor' 
+            }
+        },
+        {
+            '$unwind':'$drivers_constructor'
+        },
+        {
+            '$project':{
+                'name':'$name',
+                'surname':'$surname',
+                'code':'$code',
+                'constructor':'$drivers_constructor.name',
+                'q1':'$q1',
+                'q2':'$q2',
+                'q3':'$q3',
+                'position':'$position'
+            }
+        }
+    ])
+    qualification= list()
+    for doc in result:
+        qualification.append(doc)
+    return render_template("qualification_round_list.html", qualification_race= qualification)
 
 
 if __name__ == "__main__":
