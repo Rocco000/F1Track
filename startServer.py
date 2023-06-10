@@ -86,7 +86,8 @@ def get_drivers_season():
             '$project': {
                 'drivers_name': '$drivers_season.name',
                 'drivers_surname': '$drivers_season.surname',
-                'drivers_code': '$drivers_season.code'
+                'drivers_code': '$drivers_season.code',
+                'drivers_url': '$drivers_season.url'
             }
         },
         {
@@ -94,7 +95,8 @@ def get_drivers_season():
                 '_id':{
                     'name': '$drivers_name',
                     'surname': '$drivers_surname',
-                    'code': '$drivers_code'
+                    'code': '$drivers_code',
+                    'url':'$drivers_url'
                 }
             }
         },
@@ -110,7 +112,8 @@ def get_drivers_season():
         code=""
         if "code" in doc["_id"]:
             code = doc["_id"]["code"]
-        result_list.append({'name': name, 'surname': surname, 'code':code})
+        url=doc["_id"]["url"]
+        result_list.append({'name': name, 'surname': surname, 'code':code, 'url': url})
 
     return render_template("drivers_listing.html", result_drivers=result_list)
 
@@ -493,6 +496,34 @@ def drivers_search():
             result = db["Drivers"].find({field:value})
             result_list = list(result)
             return render_template("search_result_drivers.html", result_drivers=result_list) 
+
+@app.route('/loginPage',methods=["GET"])
+def login():
+    return render_template("login.html")
+
+
+@app.route('/loginCheck')
+def login_check():
+    username= str(request.args.get("username"))
+    password= str(request.args.get("password"))
+    result=db["Users"].aggregate([
+        {
+            '$match':{'username':username}
+        },
+        {
+            '$match': {'password':password}
+        },
+        {
+            '$project':{
+                'username':'$username',
+                'password':'$password'
+            }
+        }
+    ])
+    if result.alive:
+        return render_template("index.html")
+    return render_template("login.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
