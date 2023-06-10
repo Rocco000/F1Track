@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
 app = Flask(__name__)
+#app.secret_key = 'F1_Secret_Session_BD2'
 
 #app.register_blueprint(page, url_prefix="/")
 #Connecting to MongoDB database
@@ -193,6 +194,55 @@ def get_charts():
         }
     ])
     return render_template("index.html")
+
+@app.route('/getRaces', methods=["GET"])
+def get_races():
+    season = int(request.args.get("year"))
+    result = db["Races"].aggregate([
+        {
+            "$match":{"year":season}
+        },
+        {
+            '$project': {
+                "raceId": "$raceId",
+                "circuitId": "$circuitId",
+                "name": "$name",
+                "date": "$date",
+                "time": "$time",
+            }
+        },
+        {
+            "$lookup":{
+                'from':'Circuits',
+                'localField':'circuitId',
+                'foreignField':'circuitId',
+                'as':'related_circuit'
+            }
+        },
+        {
+            '$unwind':'$related_circuit'
+        },
+        {
+            '$project': {
+                "raceId": "$raceId",
+                "name": "$name",
+                "date": "$date",
+                "time": "$time",
+                "name_circuits": "$related_circuit.name"
+            }
+        },
+        {
+            '$sort':{'date':1}
+        }
+    ])
+    races = list()
+    for doc in result:
+        str_date = str(doc["date"])
+        doc["date"] = str_date[:10]
+        races.append(doc)
+
+    return render_template("races_list.html",races_season=races)
+
 
 
 if __name__ == "__main__":
