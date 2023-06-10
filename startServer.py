@@ -488,7 +488,7 @@ def sort_search():
         case "races":
             return render_template("")
         case "circuits":
-            return render_template("")
+            return render_template("search_circuits.html")
         case _:
             return render_template("index.html")
 
@@ -510,6 +510,23 @@ def drivers_search():
                 document["birthDate"] = str_app[:10]
                 result_list.append(document)
             return render_template("search_result_drivers.html", result_drivers=result_list) 
+        
+
+@app.route('/circuitsSearch', methods=["GET"])
+def circuits_search():
+    field=request.args.get("field")
+    value=request.args.get("value")
+    if value is None or len(value.strip())==0:
+        return render_template("index.html")
+    elif field !="city" and field !="country":
+         return render_template("index.html")
+    else:
+        result= db["Circuits"].find({field:value})
+        list_app=list(result)
+        result_list=list()
+        for doc in list_app:
+            result_list.append(doc)
+        return render_template("search_result_circuits.html", result_circuits=result_list)
 
 @app.route('/loginPage',methods=["GET"])
 def login():
