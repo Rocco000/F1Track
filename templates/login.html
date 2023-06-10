@@ -41,7 +41,11 @@
     </style>
 </head>
 <body>
-    {% include 'navbar.html' %}
+    {%if session%}
+        {%include 'admin_navbar.html'%}
+    {%else%}
+        {%include 'navbar.html'%}
+    {%endif%}
     <div class="background-image">
         <div class="container">
             <div class="form-container">

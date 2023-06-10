@@ -513,6 +513,8 @@ def drivers_search():
 
 @app.route('/loginPage',methods=["GET"])
 def login():
+    if session:
+        return render_template("admin_homepage.html")
     return render_template("login.html")
 
 
