@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'F1_Secret_Session_BD2'
 #app.secret_key = 'F1_Secret_Session_BD2'
 
 #app.register_blueprint(page, url_prefix="/")
@@ -20,6 +21,10 @@ except ConnectionFailure:
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route("/adminHome")
+def admin_home():
+    return render_template("admin_homepage.html")
 
 
 @app.route("/getSeasons")
@@ -511,10 +516,10 @@ def login():
     return render_template("login.html")
 
 
-@app.route('/loginCheck')
+@app.route('/loginCheck',methods=["POST"])
 def login_check():
-    username= str(request.args.get("username"))
-    password= str(request.args.get("password"))
+    username= str(request.form.get("username"))
+    password= str(request.form.get("password"))
     result=db["Users"].aggregate([
         {
             '$match':{'username':username}
@@ -530,8 +535,14 @@ def login_check():
         }
     ])
     if result.alive:
-        return render_template("index.html")
+        session['username'] = username
+        return redirect(url_for('admin_home'))
     return render_template("login.html")
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('home'))    
 
 
 if __name__ == "__main__":
