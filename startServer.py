@@ -86,7 +86,8 @@ def get_drivers_season():
             '$project': {
                 'drivers_name': '$drivers_season.name',
                 'drivers_surname': '$drivers_season.surname',
-                'drivers_code': '$drivers_season.code'
+                'drivers_code': '$drivers_season.code',
+                'drivers_url': '$drivers_season.url'
             }
         },
         {
@@ -94,7 +95,8 @@ def get_drivers_season():
                 '_id':{
                     'name': '$drivers_name',
                     'surname': '$drivers_surname',
-                    'code': '$drivers_code'
+                    'code': '$drivers_code',
+                    'url':'$drivers_url'
                 }
             }
         },
@@ -110,7 +112,8 @@ def get_drivers_season():
         code=""
         if "code" in doc["_id"]:
             code = doc["_id"]["code"]
-        result_list.append({'name': name, 'surname': surname, 'code':code})
+        url=doc["_id"]["url"]
+        result_list.append({'name': name, 'surname': surname, 'code':code, 'url': url})
 
     return render_template("drivers_listing.html", result_drivers=result_list)
 
