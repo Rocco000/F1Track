@@ -372,6 +372,99 @@ def get_qualification():
         qualification.append(doc)
     return render_template("qualification_round_list.html", qualification_race= qualification)
 
+@app.route('/getResult', methods=["GET"])
+def get_result():
+    race = int(request.args.get("race"))
+    query_results = db["Results"].aggregate([
+        {
+            '$match':{'raceId':race}
+        },
+        {
+            '$lookup':{
+                'from':'Drivers',
+                'localField':'driverId',
+                'foreignField':'driverId',
+                'as':'drivers_result' 
+            }
+        },
+        {
+            '$unwind':'$drivers_result'
+        },
+        {
+            '$project':{
+                'name':'$drivers_result.name',
+                'surname':'$drivers_result.surname',
+                'code':'$drivers_result.code',
+                'constructorId':'$constructorId',
+                'grid':'$grid',
+                'positionText':'$positionText',
+                'points':'$points',
+                'laps':'$laps',
+                'time':'$time',
+                'fastestLap':'$fastestLap',
+                'statusId':'$statusId'
+            }
+        },
+        {
+            '$lookup':{
+                'from':'Constructors',
+                'localField':'constructorId',
+                'foreignField':'constructorId',
+                'as':'constructors_result' 
+            }
+        },
+        {
+            '$unwind':'$constructors_result'
+        },
+        {
+            '$project':{
+                'name':'$name',
+                'surname':'$surname',
+                'code':'$code',
+                'constructor':'$constructors_result.name',
+                'grid':'$grid',
+                'positionText':'$positionText',
+                'points':'$points',
+                'laps':'$laps',
+                'time':'$time',
+                'fastestLap':'$fastestLap',
+                'statusId':'$statusId'
+            }
+        },
+        {
+            '$lookup':{
+                'from':'Status',
+                'localField':'statusId',
+                'foreignField':'statusId',
+                'as':'status_result' 
+            }
+        },
+        {
+            '$unwind':'$status_result'
+        },
+        {
+            '$project':{
+                'name':'$name',
+                'surname':'$surname',
+                'code':'$code',
+                'constructor':'$constructor',
+                'grid':'$grid',
+                'positionText':'$positionText',
+                'points':'$points',
+                'laps':'$laps',
+                'time':'$time',
+                'fastestLap':'$fastestLap',
+                'status':'$status_result.status'
+            }
+        },
+        { '$sort':{'positionText':1}}
+    ])
+
+    results= list()
+    for doc in query_results:
+        results.append(doc)
+    return render_template("result_list.html", result_race=results)
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
