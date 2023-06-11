@@ -479,14 +479,14 @@ def sort_search():
         case "drivers":
             return render_template("search_drivers.html")
         case "constructors":
-            return render_template("")
+            return render_template("search_constructors.html")
         case "races":
-            return render_template("")
+            return redirect(url_for("load_season_race_number"))
         case "circuits":
-            return render_template("")
+            return render_template("search_circuits.html")
         case _:
             return render_template("index.html")
-
+        
 @app.route('/driversSearch', methods=["GET"])
 def drivers_search():
     field = request.args.get("field")
@@ -505,6 +505,93 @@ def drivers_search():
                 document["birthDate"] = str_app[:10]
                 result_list.append(document)
             return render_template("search_result_drivers.html", result_drivers=result_list) 
+        
+@app.route('/constructorsSearch', methods=["GET"])
+def constructors_search():
+    field = request.args.get("field")
+    value = request.args.get("value")
+    if value is None or len(value.strip())==0:
+        return render_template("index.html")
+    else:  
+        if field!="name" and field!="nationality":
+            return render_template("index.html")
+        else:
+            result = db["Constructors"].find({field:value})
+            result_list = list(result)
+            return render_template("search_result_constructors.html", result_constructors=result_list) 
+
+@app.route('/loadSeasonRaceNumber')
+def load_season_race_number():
+    seasons = db["Seasons"].find()
+    seasons_list = list()
+    for season in seasons:
+        seasons_list.append(season["year"])
+    seasons_list.sort(reverse=True)
+    return render_template("search_races.html", s=seasons_list)
+
+@app.route('/racesSearch', methods=["GET"])
+def races_search():
+    race_number = request.args.get("number")
+    season = request.args.get("season")
+    if race_number is None or season is None or len(race_number.strip())==0 or len(season.strip())==0:
+        return render_template("index.html")
+    else:
+        race_number = int(race_number)
+        season = int(season)  
+        season_max_number = db["Races"].aggregate([
+            {
+                '$match':{'year':season}
+            },
+            {
+                '$group':{
+                    '_id':{'year':'$year'},
+                    'max_value': {'$max': '$raceNumber'}
+                }
+            },
+            {
+                '$project':{
+                    'max_value':'$max_value'
+                }
+            }
+        ])
+        max = 0
+        for doc in season_max_number:
+            max = doc["max_value"]
+        if race_number > max:
+            return render_template("index.html")
+        else:
+            result = db["Races"].aggregate([
+                {
+                    '$match':{"year":season, "raceNumber":race_number}
+                },
+                {
+                    '$lookup':{
+                        'from':'Circuits',
+                        'localField':'circuitId',
+                        'foreignField':'circuitId',
+                        'as':'race_circuit' 
+                    }
+                },
+                {       
+                    '$unwind': '$race_circuit'
+                },
+                {
+                    '$project': {
+                        'name':'$name',
+                        'circuit':'$race_circuit.name',
+                        'city':'$race_circuit.city',
+                        'date':'$date',
+                        'time':'$time',
+                        'url':'$url'
+                    }
+                }
+            ])
+            result_list = list()
+            for doc in result:
+                str_app = str(doc["date"])
+                doc["date"] = str_app[:10]
+                result_list.append(doc)
+            return render_template("search_result_races.html", result_races=result_list) 
 
 @app.route('/loginPage',methods=["GET"])
 def login():
