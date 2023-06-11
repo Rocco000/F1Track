@@ -41,12 +41,16 @@
     </style>
 </head>
 <body>
-    {% include 'navbar.html' %}
+    {%if session%}
+        {%include 'admin_navbar.html'%}
+    {%else%}
+        {%include 'navbar.html'%}
+    {%endif%}
     <div class="background-image">
         <div class="container">
             <div class="form-container">
                 <!--<h2>Search drivers for season</h2>-->
-                <form action="/loginCheck" method="GET">
+                <form action="/loginCheck" method="POST">
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" class="form-control" id="username" aria-describedby="emailHelp" placeholder="Enter username" name="username">
