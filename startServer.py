@@ -698,13 +698,14 @@ def insert_driver():
         code = request.args.get("code")
         app_list = list((name, surname, birth, nat))
         if check_string(app_list):
+            max = get_max_field_value(db["Drivers"], "driverId") +1
             date_format = '%Y-%m-%d'
             date_object = datetime.strptime(birth, date_format)
             insert_result = None
             if code is None or len(code.strip())==0:
-                insert_result = db["Drivers"].insert_one({"name":name, "surname":surname, "birthDate":date_object, "nationality":nat})
+                insert_result = db["Drivers"].insert_one({"driverId":max, "name":name, "surname":surname, "birthDate":date_object, "nationality":nat})
             else:
-                insert_result = db["Drivers"].insert_one({"name":name, "surname":surname, "code":code, "birthDate":date_object, "nationality":nat})
+                insert_result = db["Drivers"].insert_one({"driverId":max, "name":name, "surname":surname, "code":code, "birthDate":date_object, "nationality":nat})
             if insert_result.acknowledged:
                 flash(f"Driver insert with success!")
             else:
@@ -729,6 +730,13 @@ def check_string(words):
         
     return True
             
+def get_max_field_value(collection, field):
+    pipeline = [
+        {"$group": {"_id": None, "max_value": {"$max": "$"+field}}}
+    ]
+    result = list(collection.aggregate(pipeline))
+    max_value = result[0]["max_value"] if result else None
+    return max_value
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
