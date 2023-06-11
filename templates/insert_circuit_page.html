@@ -49,18 +49,20 @@
         <div class="container">
             <div class="form-container">
                 <h2>Insert driver data</h2>
-                <form action="/insertDriver" method="GET">
+                <form action="/insertCircuit" method="GET">
                     <div class="form-group">
                         <label for="name">Name:</label>
                         <input class="form-control" type="text" placeholder="Name" id="name" name="name" required>
-                        <label for="surname">Surname:</label>
-                        <input class="form-control" type="text" placeholder="Surname" id="surname" name="surname" required>
-                        <label for="birth">Birth date:</label>
-                        <input class="form-control" type="date" placeholder="yyyy-mm-dd" id="birth" name="birth" required>
-                        <label for="nat">Nationality:</label>
-                        <input class="form-control" type="text" placeholder="Nationality" id="nat" name="nat" required>
-                        <label for="code">Driver code:</label>
-                        <input class="form-control" type="text" placeholder="Code" id="code" name="code">
+                        <label for="city">City:</label>
+                        <input class="form-control" type="text" placeholder="City" id="city" name="city" required>
+                        <label for="country">Country:</label>
+                        <input class="form-control" type="text" placeholder="Country" id="country" name="country" required>
+                        <label for="lat">Latitude:</label>
+                        <input class="form-control" type="text" placeholder="Latitude" id="lat" name="lat">
+                        <label for="long">Longitude:</label>
+                        <input class="form-control" type="text" placeholder="Longitude" id="long" name="long">
+                        <label for="alt">Altitude:</label>
+                        <input class="form-control" type="text" placeholder="Altitude" id="alt" name="alt">
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>

@@ -716,6 +716,52 @@ def insert_driver():
     else:
         return redirect(url_for("home"))
 
+@app.route('/insertCircuit', methods=["GET"])
+def insert_circuit():
+    if check_session():
+        name = request.args.get("name")
+        city = request.args.get("city")
+        country = request.args.get("country")
+        lat = request.args.get("lat")
+        long = request.args.get("long")
+        alt = request.args.get("alt")
+        app_list = list((name, city, country))
+        if check_string(app_list):
+            max = get_max_field_value(db["Circuits"], "circuitId") +1
+            insert_result = None
+            if (lat is None or len(lat.strip())==0) and (long is None or len(long.strip())==0) and (alt is None or len(alt.strip())==0):
+                #There is not a position
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country})
+            elif (not (lat is None or len(lat.strip())==0)) and (long is None or len(long.strip())==0) and (alt is None or len(alt.strip())==0):
+                #There is only latitude
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"latitude":lat}})
+            elif (lat is None or len(lat.strip())==0) and (not (long is None or len(long.strip())==0)) and (alt is None or len(alt.strip())==0):
+                #There is only longitude
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"longitude":long}})
+            elif (lat is None or len(lat.strip())==0) and (long is None or len(long.strip())==0) and (not (alt is None or len(alt.strip())==0)):
+                #There is only altitude
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"altitude":alt}})
+            elif (not (lat is None or len(lat.strip())==0) and (long is None or len(long.strip())==0)) and (alt is None or len(alt.strip())==0):
+                #There are latitude and longitude
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"latitude":lat, "longitude":long}})
+            elif (lat is None or len(lat.strip())==0) and (not (long is None or len(long.strip())==0) and (alt is None or len(alt.strip())==0)):
+                #There are longitude and altitude
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"longitude":long, "altitude":alt}})
+            elif (not (lat is None or len(lat.strip())==0)) and (long is None or len(long.strip())==0) and (not (alt is None or len(alt.strip())==0)):
+                #There are latitude and altitude
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"latitude":lat, "altitude":alt}})
+            else:
+                #There is a full position
+                insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"latitude":lat, "longitude":long, "altitude":alt}})
+            
+            if insert_result.acknowledged:
+                flash(f"Circuit insert with success!")
+            else:
+                flash(f"Insert NOT done!")
+            return redirect(url_for('admin_operation', operation="1"))
+    else:
+        return redirect(url_for("home"))
+    
 
 @app.route('/insertConstructor',methods=["GET"])
 def insert_constructor():
