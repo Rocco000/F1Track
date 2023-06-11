@@ -683,6 +683,8 @@ def sort_insert():
                 return render_template("insert_race_page.html")
             case "circuit":
                 return render_template("insert_circuit_page.html")
+            case "season":
+                return render_template("insert_season_page.html")
             case _:
                 return redirect(url_for("admin_home"))
     else:
@@ -786,6 +788,26 @@ def insert_constructor():
             return redirect(url_for("admin_home"))
     else: 
         return redirect(url_for("home"))
+
+
+@app.route('/insertSeason',methods=["GET"])
+def insert_season():
+    if session:
+        year=request.args.get("year")
+        url=request.args.get("url")
+        app_list=list((year,url))
+        if check_string(app_list):
+            insert_result=db["Seasons"].insert_one({"year":int(year), "url":url})
+            if insert_result.acknowledged:
+                flash(f"Season insert with success!")
+            else:
+                flash(f"Insert NOT done!")
+            return redirect(url_for('admin_operation', operation="1"))
+        else:
+            return redirect(url_for("admin_home"))
+    else:
+        return redirect(url_for("home"))
+
 
 
 def check_session():
