@@ -680,7 +680,13 @@ def sort_insert():
             case "constructor":
                 return render_template("insert_constructor_page.html")
             case "race":
-                return render_template("insert_race_page.html")
+                seasons = db["Seasons"].find()
+                seasons_list = list()
+                for season in seasons:
+                    seasons_list.append(season["year"])
+                seasons_list.sort(reverse=True)
+                circuits=db["Circuits"].find({},{'circuitId':1,'name':1})
+                return render_template("insert_race_page.html",s=seasons_list, c=circuits)
             case "circuit":
                 return render_template("insert_circuit_page.html")
             case "season":
@@ -800,6 +806,55 @@ def insert_season():
             insert_result=db["Seasons"].insert_one({"year":int(year), "url":url})
             if insert_result.acknowledged:
                 flash(f"Season insert with success!")
+            else:
+                flash(f"Insert NOT done!")
+            return redirect(url_for('admin_operation', operation="1"))
+        else:
+            return redirect(url_for("admin_home"))
+    else:
+        return redirect(url_for("home"))
+    
+
+@app.route('/insertRace',methods=["GET"])
+def insert_race():
+    if session:
+        year=request.args.get("year")
+        circuitId=request.args.get("circuit")
+        name=request.args.get("name")
+        date=request.args.get("race-date")
+        time=request.args.get("race-time")
+        url=request.args.get("url")
+        app_list=list((year,circuitId,name,date,time))
+        if check_string(app_list):
+            year=int(year)
+            circuitId=int(circuitId)
+            date_format = '%Y-%m-%d'
+            date= datetime.strptime(date, date_format)
+            raceId=get_max_field_value(db["Races"],"raceId")+1
+            race_number_result=db["Races"].aggregate([
+                {
+                    '$match': {'year':year}
+                },
+                {
+                    '$group':{
+                        '_id':{'year':'$year'},
+                        'max_value': {'$max': '$raceNumber'}
+                    }
+                },
+                {
+                    '$project':{
+                        'max_value':'$max_value'
+                    }
+                }
+            ])
+            for doc in race_number_result:
+                raceNumber=doc["max_value"]+1
+            if url is None or len(url.strip())==0:
+                insert_result=db["Races"].insert_one({"raceId": raceId, "year": year, "raceNumber": raceNumber, "circuitId": circuitId, "name": name, "date":date ,"time": time})
+            else:
+                insert_result=db["Races"].insert_one({"raceId": raceId, "year": year, "raceNumber": raceNumber, "circuitId": circuitId, "name": name, "date":date ,"time": time,"url": url})
+            if insert_result.acknowledged:
+                flash(f"Race insert with success!")
             else:
                 flash(f"Insert NOT done!")
             return redirect(url_for('admin_operation', operation="1"))

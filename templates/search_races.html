@@ -48,7 +48,7 @@
     <div class="background-image">
         <div class="container">
             <div class="form-container">
-                <h2>Search drivers</h2>
+                <h2>Search races</h2>
                 <form action="/racesSearch" method="GET">
                     <div class="form-group">
                         <label for="season">Insert season:</label>
@@ -58,7 +58,7 @@
                             {%endfor%}
                         </select>
                         <label for="number">Insert race number:</label>
-                        <input class="form-control" type="number" placeholder="Number" id="number" name="number">
+                        <input class="form-control" type="number" placeholder="Number" id="number" name="number" min="1">
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>

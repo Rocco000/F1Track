@@ -48,13 +48,27 @@
     <div class="background-image">
         <div class="container">
             <div class="form-container">
-                <h2>Insert constuctor data</h2>
-                <form action="/insertConstructor" method="GET">
+                <h2>Insert race data</h2>
+                <form action="/insertRace" method="GET">
                     <div class="form-group">
+                        <label for="season">Season:</label>
+                        <select class="form-control" id="year-select" name="year" required>
+                            {%for year in s%}
+                            <option value="{{year}}">{{year}}</option>
+                            {%endfor%}
+                        </select>
+                        <label for="circuit-select">Circuit:</label>
+                        <select class="form-control" id="circuit-select" name="circuit" required>
+                            {%for circuit in c%}
+                            <option value="{{circuit.circuitId}}">{{circuit.name}}</option>
+                            {%endfor%}
+                        </select>
                         <label for="name">Name:</label>
                         <input class="form-control" type="text" placeholder="Name" id="name" name="name" required>
-                        <label for="nationality">Nationality:</label>
-                        <input class="form-control" type="text" placeholder="Nationality" id="nationality" name="nationality" required>
+                        <label for="race-date">Date:</label>
+                        <input class="form-control" type="date" placeholder="yyyy-mm-dd" id="race-date" name="race-date" required>
+                        <label for="race-time">Time:</label>
+                        <input class="form-control" type="time" placeholder="00:00:00" id="race-time" name="race-time" required>
                         <label for="url">Url:</label>
                         <input class="form-control" type="url" placeholder="Url" id="url" name="url">
                     </div>
