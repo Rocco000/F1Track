@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'F1_Secret_Session_BD2'
@@ -649,6 +650,85 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('home'))    
 
+@app.route('/adminOperation', methods=["GET"])
+def admin_operation():
+    if check_session():
+        chose = request.args.get("operation")
+        if chose is None or len(chose.strip())==0:
+            return redirect(url_for("admin_home"))
+        else:
+            chose = int(chose)
+            match chose:
+                case 1:
+                    return render_template("insert_form.html")
+                case 2:
+                    return render_template("update_form.html")
+                case 3:
+                    return render_template("delete_form.html")
+                case _:
+                    return redirect(url_for("admin_home"))
+    else:
+        return redirect(url_for("home"))
+
+@app.route('/sortInsert', methods=["GET"])
+def sort_insert():
+    if check_session():
+        collection = request.args.get("collection")
+        match collection:
+            case "driver":
+                return render_template("insert_driver_page.html")
+            case "constructor":
+                return render_template("insert_constructor_page.html")
+            case "race":
+                return render_template("insert_race_page.html")
+            case "circuit":
+                return render_template("insert_circuit_page.html")
+            case _:
+                return redirect(url_for("admin_home"))
+    else:
+        redirect(url_for("home"))
+
+@app.route('/insertDriver', methods=["GET"])
+def insert_driver():
+    if check_session():
+        name = request.args.get("name")
+        surname = request.args.get("surname")
+        birth = request.args.get("birth")
+        nat = request.args.get("nat")
+        code = request.args.get("code")
+        app_list = list((name, surname, birth, nat))
+        if check_string(app_list):
+            date_format = '%Y-%m-%d'
+            date_object = datetime.strptime(birth, date_format)
+            insert_result = None
+            if code is None or len(code.strip())==0:
+                insert_result = db["Drivers"].insert_one({"name":name, "surname":surname, "birthDate":date_object, "nationality":nat})
+            else:
+                insert_result = db["Drivers"].insert_one({"name":name, "surname":surname, "code":code, "birthDate":date_object, "nationality":nat})
+            if insert_result.acknowledged:
+                flash(f"Driver insert with success!")
+            else:
+                flash(f"Insert NOT done!")
+            return redirect(url_for('admin_operation', operation="1"))
+        else:
+            return redirect(url_for("admin_home"))        
+    else:
+        return redirect(url_for("home"))
+
+
+def check_session():
+    if session:
+        return True
+    else:
+        return False
+
+def check_string(words):
+    for element in words:
+        if element is None or len(element.strip())==0:
+            return False
+        
+    return True
+            
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
