@@ -26,24 +26,22 @@
           <thead class="thead-dark">
             <tr>
               <th scope="col">Name</th>
-              <th scope="col">Surname</th>
-              <th scope="col">Code</th>
-              <th scope="col">Birth date</th>
-              <th scope="col">Nationality</th>
+              <th scope="col">City</th>
+              <th scope="col">Country</th>
+              <th scope="col">Position</th>
               <th scope="col">URL</th>
             </tr>
           </thead>
           <tbody>
             {%
-            for driver in result_drivers
+            for circuit in result_circuits
             %}
                 <tr>
-                <td>{{driver.name}}</td>
-                <td>{{driver.surname}}</td>
-                <td>{{driver.code}}</td>
-                <td>{{driver.birthDate}}</td>
-                <td>{{driver.nationality}}</td>
-                <td><a href="{{driver.url}}">click_to_info</a></td>
+                <td>{{circuit.name}}</td>
+                <td>{{circuit.city}}</td>
+                <td>{{circuit.country}}</td>
+                <td>{{circuit.position.latitude}} ; {{circuit.position.longitude}} ; {{circuit.position.altitude}}</td>
+                <td><a href="{{circuit.url}}">click here for more info</a></td>
                 </tr>
             {%
             endfor

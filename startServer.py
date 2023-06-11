@@ -511,6 +511,7 @@ def drivers_search():
                 result_list.append(document)
             return render_template("search_result_drivers.html", result_drivers=result_list) 
         
+<<<<<<< HEAD
 @app.route('/constructorsSearch', methods=["GET"])
 def constructors_search():
     field = request.args.get("field")
@@ -597,6 +598,24 @@ def races_search():
                 doc["date"] = str_app[:10]
                 result_list.append(doc)
             return render_template("search_result_races.html", result_races=result_list) 
+=======
+
+@app.route('/circuitsSearch', methods=["GET"])
+def circuits_search():
+    field=request.args.get("field")
+    value=request.args.get("value")
+    if value is None or len(value.strip())==0:
+        return render_template("index.html")
+    elif field !="city" and field !="country":
+         return render_template("index.html")
+    else:
+        result= db["Circuits"].find({field:value})
+        list_app=list(result)
+        result_list=list()
+        for doc in list_app:
+            result_list.append(doc)
+        return render_template("search_result_circuits.html", result_circuits=result_list)
+>>>>>>> simoChanges
 
 @app.route('/loginPage',methods=["GET"])
 def login():
