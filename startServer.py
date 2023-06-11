@@ -717,6 +717,31 @@ def insert_driver():
         return redirect(url_for("home"))
 
 
+@app.route('/insertConstructor',methods=["GET"])
+def insert_constructor():
+    if check_session():
+        name=request.args.get("name")
+        nationality=request.args.get("nationality")
+        url=request.args.get("url")
+        app_list=list((name,nationality))
+        if check_string(app_list):
+            max_id=get_max_field_value(db["Constructors"],"constructorId")+1
+            insert_result=None
+            if url is None or len(url.strip())==0:
+                insert_result=db["Constructors"].insert_one({"constructorId":max_id, "name":name, "nationality":nationality})
+            else:
+                insert_result=db["Constructors"].insert_one({"constructorId":max_id, "name":name, "nationality":nationality, "url": url})
+            if insert_result.acknowledged:
+                flash(f"Constructor insert with success!")
+            else:
+                flash(f"Insert NOT done!")
+            return redirect(url_for('admin_operation', operation="1"))
+        else:
+            return redirect(url_for("admin_home"))
+    else: 
+        return redirect(url_for("home"))
+
+
 def check_session():
     if session:
         return True
