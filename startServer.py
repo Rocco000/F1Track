@@ -741,10 +741,10 @@ def insert_circuit():
             elif (lat is None or len(lat.strip())==0) and (long is None or len(long.strip())==0) and (not (alt is None or len(alt.strip())==0)):
                 #There is only altitude
                 insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"altitude":alt}})
-            elif (not (lat is None or len(lat.strip())==0) and (long is None or len(long.strip())==0)) and (alt is None or len(alt.strip())==0):
+            elif not((lat is None or len(lat.strip())==0) and (long is None or len(long.strip())==0)) and (alt is None or len(alt.strip())==0):
                 #There are latitude and longitude
                 insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"latitude":lat, "longitude":long}})
-            elif (lat is None or len(lat.strip())==0) and (not (long is None or len(long.strip())==0) and (alt is None or len(alt.strip())==0)):
+            elif (lat is None or len(lat.strip())==0) and not((long is None or len(long.strip())==0) and (alt is None or len(alt.strip())==0)):
                 #There are longitude and altitude
                 insert_result = db["Circuits"].insert_one({"circuitId":max, "name":name, "city":city, "country":country, "position":{"longitude":long, "altitude":alt}})
             elif (not (lat is None or len(lat.strip())==0)) and (long is None or len(long.strip())==0) and (not (alt is None or len(alt.strip())==0)):
