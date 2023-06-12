@@ -666,9 +666,15 @@ def admin_operation():
                     seasons_list = list()
                     for doc in result_season:
                         seasons_list.append(doc["year"])
+                    seasons_list.sort(reverse=True)
                     return render_template("update_form.html", seasons=seasons_list)
                 case 3:
-                    return render_template("delete_form.html")
+                    result_season = db["Seasons"].find()
+                    seasons_list = list()
+                    for doc in result_season:
+                        seasons_list.append(doc["year"])
+                    seasons_list.sort(reverse=True)
+                    return render_template("delete_form.html",seasons=seasons_list)
                 case _:
                     return redirect(url_for("admin_home"))
     else:
@@ -1242,6 +1248,59 @@ def update_result():
             return redirect(url_for('admin_operation', operation="2"))
     else:
         return redirect(url_for("home"))
+    
+
+    
+@app.route('/sortDelete',methods=["GET"])
+def sort_delete():
+    if check_session():
+        collection = request.args.get("collection")
+        season = request.args.get("season")
+        app_list = list((collection, season))
+        if check_string(app_list):
+            #Check if the season is in the DB
+            check_query = db["Seasons"].find({"year":int(season)})
+            first_document = next(check_query, None)
+            if first_document is None:
+                flash(f"The season is wrong!")
+                return redirect(url_for('admin_operation', operation="3"))
+            race_result = db["Races"].find({"year":int(season)}) #Take all races of a certain season
+            race_list = list()
+            for doc in race_result:
+                race_list.append({"raceId":doc["raceId"], "name":doc["name"]})
+            match collection:
+                case "race":
+                    return render_template("delete_race.html",races=race_list)
+                case _:
+                    return redirect(url_for("admin_home"))
+        else:
+            flash(f"You missed data in the delete section!")
+            return redirect(url_for('admin_operation', operation="3"))
+    else:
+        return redirect(url_for("home"))
+    
+
+@app.route('/deleteRace',methods=["GET"])
+def delete_race():
+    if check_session():
+        raceId=request.args.get("race")
+        app_list=list((raceId))
+        if check_string(app_list):
+            raceId=int(raceId)
+            delete_result=db["Races"].delete_one({"raceId":raceId})
+            db["Qualifying"].delete_many({"raceId":raceId})
+            db["Results"].delete_many({"raceId":raceId})
+            if delete_result.acknowledged:
+                flash(f"Race deleted with success!")
+            else:
+                flash(f"Delete NOT done!")
+            return redirect(url_for('admin_operation', operation="3"))
+        else:
+            flash(f"You missed data in the delete section!")
+            return redirect(url_for('admin_operation', operation="3"))
+    else:
+        return redirect(url_for("home"))
+
 
 @app.route('/loadUpdateQualification', methods=["GET"])
 def load_update_qualification():
