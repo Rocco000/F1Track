@@ -704,6 +704,7 @@ def sort_insert():
                 result_list = list()
                 for doc in result:
                     result_list.append(doc["year"])
+                result_list.sort(reverse=True)
                 return render_template("insert_qualification.html", s=result_list)
 
             case "season":
