@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1Track</title>
+
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            min-height: 110vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .background-image {
+            background-image: url("../static/images/drivers_img.png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            height: 110vh;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            border: 1px solid #e9e9e9;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 1000px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 10vh;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!--Bootstrap css-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    {%include 'admin_navbar.html'%}
+    <div class="background-image">
+    <div class="form-container">
+        <h2>Insert result data</h2>
+        <form action="/insertResult" method="GET">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="race">Race:</label>
+                            <select class="form-control" id="race" name="race" required>
+                                {%for race in races%}
+                                <option value="{{race.raceId}}">{{race.name}}</option>
+                                {%endfor%}
+                            </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="driver-select">Driver:</label>
+                            <select class="form-control" id="driver" name="driver" required>
+                                {%for driver in drivers%}
+                                <option value="{{driver.driverId}}">{{driver.name}} {{driver.surname}}</option>
+                                {%endfor%}
+                            </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="constructor">Constructor:</label>
+                            <select class="form-control" id="constructor" name="constructor" required>
+                                {%for constructor in constructors%}
+                                <option value="{{constructor.constructorId}}">{{constructor.name}}</option>
+                                {%endfor%}
+                            </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="car-number">Car number:</label>
+                        <input class="form-control" type="number" placeholder="Car number" id="car-number" name="car-number" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="grid">Grid:</label>
+                        <input class="form-control" type="number" placeholder="Grid" id="grid" name="grid" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position:</label>
+                        <input class="form-control" type="number" placeholder="Position" id="position" name="position" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="position-text">Position text:</label>
+                        <input class="form-control" type="text" placeholder="Position in text" id="position-text" name="position-text" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="points">Points:</label>
+                        <input class="form-control" type="number" min="0" placeholder="Points" id="points" name="points" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="laps">Laps</label>
+                        <input class="form-control" type="number" min="0" placeholder="Laps" id="laps" name="laps" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">Time</label>
+                        <input class="form-control" type="text" placeholder="hh:mm:ss" id="time" name="time" required>
+                        <!--<script>
+                            $(document).ready(function() {
+                                $('#time').on('input', function() {
+                                    var input = $(this).val();
+                                    if (input.length === 2 || input.length===5)  {
+                                        $(this).val(input + ':');
+                                    }
+                                });
+                            });
+                        </script>-->
+                    </div>
+                    <div class="form-group">
+                        <label for="fastest-lap">Fastest lap</label>
+                        <input class="form-control" type="number" placeholder="1" min="1" id="fastest-lap" name="fastest-lap" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fastest-lap-time">Fastest lap time</label>
+                        <input class="form-control" type="text" placeholder="hh:mm:ss" id="fastest-lap-time" name="fastest-lap-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fastest-lap-speed">Fastest lap speed</label>
+                        <input class="form-control" type="number" placeholder="0km/h" min="0" id="fastest-lap-speed" name="fastest-lap-speed" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <select class="form-control" id="circuit-select" name="status" required>
+                            {%for status in status_list%}
+                            <option value="{{status.statusId}}">{{status.status}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+
+            
+        </form>
+    </div>
+    </div>
+    {% include 'footer.html' %}
+
+    <!--Script Bootstrap-->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>

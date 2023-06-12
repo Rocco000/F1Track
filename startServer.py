@@ -691,6 +691,13 @@ def sort_insert():
                 return render_template("insert_circuit_page.html")
             case "season":
                 return render_template("insert_season_page.html")
+            case "result":
+                seasons = db["Seasons"].find()
+                seasons_list = list()
+                for season in seasons:
+                    seasons_list.append(season["year"])
+                seasons_list.sort(reverse=True)
+                return render_template("insert_season_result_page.html", s=seasons_list)
             case _:
                 return redirect(url_for("admin_home"))
     else:
@@ -862,7 +869,75 @@ def insert_race():
             return redirect(url_for("admin_home"))
     else:
         return redirect(url_for("home"))
+    
 
+@app.route('/insertResultData',methods=["GET"])
+def insert_result_data():
+    if session:
+        season=request.args.get("year")
+        season=int(season)
+        races= db["Races"].find({'year': season},{'raceId':1,'name':1,'circuitId':1})
+        drivers = db['Drivers'].find({},{'driverId':1,'name':1, 'surname':1})
+        status=db["Status"].find({},{'statusId':1,'status':1})
+        constructors=db["Constructors"].find({},{'constructorId':1,'name':1})
+        races_list=list()
+        for race in races:
+            races_list.append(race)
+        return render_template("insert_result_page.html", races=races_list,drivers=drivers,status_list=status,constructors=constructors)
+    else:
+        return redirect(url_for("home"))
+
+
+@app.route('/insertResult',methods=["GET"])
+def insert_result():
+    if session:
+        resultId=get_max_field_value(db["Results"],"resultId")+1
+        raceId=request.args.get("race")
+        driverId=request.args.get("driver")
+        constructorId=request.args.get("constructor")
+        check_validity=db["Results"].find({'raceId':int(raceId), 'driverId':int(driverId)},{})
+        first_document = next(check_validity, None)
+        if first_document is not None:
+            flash(f"This result already exist!")
+            return redirect(url_for('admin_operation', operation="1")) 
+        carNumber=request.args.get("car-number")
+        grid=request.args.get("grid")
+        position=request.args.get("position")
+        positionText=request.args.get("position-text")
+        points=request.args.get("points")
+        laps=request.args.get("laps")
+        time=request.args.get("time")
+        fastestLap=request.args.get("fastest-lap")
+        fastestLapTime=request.args.get("fastest-lap-time")
+        fastestLapSpeed=request.args.get("fastest-lap-speed")
+        status=request.args.get("status")
+
+        app_list=list((raceId,driverId,grid,position,positionText,points,laps,time,fastestLap,fastestLapTime,fastestLapSpeed,status))
+        if check_string(app_list):
+            raceId=int(raceId)
+            driverId=int(driverId)
+            constructorId=int(constructorId)
+            grid=int(grid)
+            position=int(position)
+            if positionText.isdigit:
+                positionText=int(positionText)
+            points=int(points)
+            laps=int(laps)
+            fastestLap=int(fastestLap)
+            status=int(status)
+            if carNumber is None or len(carNumber.strip())==0:
+                insert_result=db["Results"].insert_one({"resultId": resultId, "raceId": raceId, "driverId": driverId, "constructorId": constructorId, "grid": grid, "position": position, "positionText": positionText, "points": points, "laps": laps, "time": time, "fastestLap": fastestLap, "fastestLapTime": fastestLapTime, "fastestLapSpeed": fastestLapSpeed, "statusId": status})
+            else:
+                insert_result=db["Results"].insert_one({"resultId": resultId, "raceId": raceId, "driverId": driverId, "constructorId": constructorId, "carNumber":carNumber, "grid": grid, "position": position, "positionText": positionText, "points": points, "laps": laps, "time": time, "fastestLap": fastestLap, "fastestLapTime": fastestLapTime, "fastestLapSpeed": fastestLapSpeed, "statusId": status})
+            if insert_result.acknowledged:
+                flash(f"Race insert with success!")
+            else:
+                flash(f"Insert NOT done!")
+            return redirect(url_for('admin_operation', operation="1"))
+        else:
+            return redirect(url_for("admin_home"))
+    else:
+        return redirect(url_for("home"))
 
 
 def check_session():
