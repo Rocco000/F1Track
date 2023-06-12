@@ -39,38 +39,23 @@
             height: 100vh;
         }
     </style>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <script>
-                alert("{{ messages[0] }}");
-            </script>
-        {% endif %}
-    {% endwith %}
 
     <!--Bootstrap css-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    {%if session%}
-        {%include 'admin_navbar.html'%}
-    {%else%}
-        {%include 'navbar.html'%}
-    {%endif%}
+    {%include 'admin_navbar.html'%}
     <div class="background-image">
         <div class="container">
             <div class="form-container">
-                <h2>What do you want to insert into the database?</h2>
-                <form action="/sortInsert" method="GET">
+                <h2>Insert a qualification</h2>
+                <form action="/insertQualifyGetDriversRaces" method="GET">
                     <div class="form-group">
-                        <label for="collection">Select the document type:</label>
-                        <select class="form-control" id="collection" name="collection">
-                            <option value="circuit">Circuit</option>
-                            <option value="constructor">Constructor</option>
-                            <option value="driver">Driver</option>
-                            <option value="race">Race</option>
-                            <option value="result">Result</option>
-                            <option value="season">Season</option>
-                            <option value="qualification">Qualification</option>
+                        <label for="year-select">Select the season:</label>
+                        <select class="form-control" id="year-select" name="year">
+                            {%for year in s%}
+                            <option value="{{year}}">{{year}}</option>
+                            {%endfor%}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>

@@ -59,18 +59,19 @@
     <div class="background-image">
         <div class="container">
             <div class="form-container">
-                <h2>What do you want to insert into the database?</h2>
-                <form action="/sortInsert" method="GET">
+                <h2>What do you want to update into the database?</h2>
+                <form action="/sortUpdate" method="GET">
                     <div class="form-group">
                         <label for="collection">Select the document type:</label>
                         <select class="form-control" id="collection" name="collection">
-                            <option value="circuit">Circuit</option>
-                            <option value="constructor">Constructor</option>
-                            <option value="driver">Driver</option>
-                            <option value="race">Race</option>
-                            <option value="result">Result</option>
-                            <option value="season">Season</option>
+                            <option value="result">Race result</option>
                             <option value="qualification">Qualification</option>
+                        </select>
+                        <label for="season">Select the season:</label>
+                        <select class="form-control" id="season" name="season">
+                            {%for year in seasons%}
+                            <option value="{{year}}">{{year}}</option>
+                            {%endfor%}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>

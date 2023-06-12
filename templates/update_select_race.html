@@ -59,18 +59,19 @@
     <div class="background-image">
         <div class="container">
             <div class="form-container">
-                <h2>What do you want to insert into the database?</h2>
-                <form action="/sortInsert" method="GET">
+                {%if flag==1%}
+                <h2>Update race result</h2>
+                <form action="/loadUpdateResult" method="GET">
+                {%else%}
+                <h2>Update race qualification round</h2>
+                <form action="/loadUpdateQualification" method="GET">
+                {%endif%}
                     <div class="form-group">
-                        <label for="collection">Select the document type:</label>
-                        <select class="form-control" id="collection" name="collection">
-                            <option value="circuit">Circuit</option>
-                            <option value="constructor">Constructor</option>
-                            <option value="driver">Driver</option>
-                            <option value="race">Race</option>
-                            <option value="result">Result</option>
-                            <option value="season">Season</option>
-                            <option value="qualification">Qualification</option>
+                        <label for="race">Select the race:</label>
+                        <select class="form-control" id="race" name="race">
+                            {%for r in races%}
+                            <option value="{{r.raceId}}">{{r.name}}</option>
+                            {%endfor%}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>

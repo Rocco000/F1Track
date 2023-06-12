@@ -39,39 +39,44 @@
             height: 100vh;
         }
     </style>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <script>
-                alert("{{ messages[0] }}");
-            </script>
-        {% endif %}
-    {% endwith %}
 
     <!--Bootstrap css-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    {%if session%}
-        {%include 'admin_navbar.html'%}
-    {%else%}
-        {%include 'navbar.html'%}
-    {%endif%}
+    {%include 'admin_navbar.html'%}
     <div class="background-image">
         <div class="container">
             <div class="form-container">
-                <h2>What do you want to insert into the database?</h2>
-                <form action="/sortInsert" method="GET">
+                <h2>Insert the qualification round of a driver</h2>
+                <form action="/insertQualify" method="GET">
                     <div class="form-group">
-                        <label for="collection">Select the document type:</label>
-                        <select class="form-control" id="collection" name="collection">
-                            <option value="circuit">Circuit</option>
-                            <option value="constructor">Constructor</option>
-                            <option value="driver">Driver</option>
-                            <option value="race">Race</option>
-                            <option value="result">Result</option>
-                            <option value="season">Season</option>
-                            <option value="qualification">Qualification</option>
+                        <label for="raceName">Select the race:</label>
+                        <select class="form-control" id="raceName" name="raceName">
+                            {%for race in races%}
+                            <option value="{{race.id}}">{{race.name}}</option>
+                            {%endfor%}
                         </select>
+                        <label for="driver">Select the driver:</label>
+                        <select class="form-control" id="driver" name="driver">
+                            {%for d in drivers%}
+                            <option value="{{d.driverId}}">{{d.name_surname}}</option>
+                            {%endfor%}
+                        </select>
+                        <label for="constructor">Select the driver team:</label>
+                        <select class="form-control" id="constructor" name="constructor">
+                            {%for c in constructors%}
+                            <option value="{{c.constructorId}}">{{c.name}}</option>
+                            {%endfor%}
+                        </select>
+                        <label for="position">Insert the final position:</label>
+                        <input class="form-control" type="number" placeholder="Position" id="position" name="position" required>
+                        <label for="q1">Insert the first qualification time:</label>
+                        <input class="form-control" type="time" placeholder="00:00:00" id="q1" name="q1" required>
+                        <label for="q2">Insert the second qualification time:</label>
+                        <input class="form-control" type="time" placeholder="00:00:00" id="q2" name="q2">
+                        <label for="q3">Insert the third qualification time:</label>
+                        <input class="form-control" type="time" placeholder="00:00:00" id="q3" name="q3">
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
