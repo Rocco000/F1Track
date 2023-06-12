@@ -1243,6 +1243,176 @@ def update_result():
     else:
         return redirect(url_for("home"))
 
+@app.route('/loadUpdateQualification', methods=["GET"])
+def load_update_qualification():
+    if check_session():
+        raceId = request.args.get("race")
+        if raceId is not None and len(raceId.strip())!=0:
+            raceId = int(raceId)
+            #Check if the race has qualification round in the DB
+            check_query = db["Qualifying"].find({"raceId":raceId})
+            first_document = next(check_query, None)
+            if first_document is None:
+                flash(f"You sent a wrong race!")
+                return redirect(url_for('admin_operation', operation="2"))
+            
+            result = db["Qualifying"].aggregate([
+                {
+                    '$match':{'raceId':raceId}
+                },
+                {
+                    '$lookup':{
+                        'from':'Drivers',
+                        'localField':'driverId',
+                        'foreignField':'driverId',
+                        'as':'drivers_qualify' 
+                    }
+                },
+                {
+                    '$unwind':'$drivers_qualify'
+                },
+                {
+                    '$project':{
+                        'driverId':'$drivers_qualify.driverId',
+                        'name':'$drivers_qualify.name',
+                        'surname':'$drivers_qualify.surname',
+                        'code':'$drivers_qualify.code',
+                        'constructorId':'$constructorId',
+                        'q1':'$q1',
+                        'q2':'$q2',
+                        'q3':'$q3',
+                        'position':'$position'
+                    }
+                },
+                {
+                    '$lookup':{
+                        'from':'Constructors',
+                        'localField':'constructorId',
+                        'foreignField':'constructorId',
+                        'as':'drivers_constructor' 
+                    }
+                },
+                {
+                    '$unwind':'$drivers_constructor'
+                },
+                {
+                    '$project':{
+                        'driverId':'$driverId',
+                        'name':'$name',
+                        'surname':'$surname',
+                        'code':'$code',
+                        'constructor':'$drivers_constructor.name',
+                        'q1':'$q1',
+                        'q2':'$q2',
+                        'q3':'$q3',
+                        'position':'$position'
+                    }
+                },
+                {
+                    "$sort":{"position":1}
+                }
+            ])
+
+            drivers_list = list()
+            for doc in result:
+                drivers_list.append(doc)
+            return render_template("update_qualification.html", qualification_race=drivers_list, race=raceId)
+        else:
+            flash(f"You sent a wrong race!")
+            return redirect(url_for('admin_operation', operation="2"))
+    else:
+        return redirect(url_for("home"))
+
+@app.route('/updateQualification', methods=["POST"])
+def update_qualification():
+    if check_session():
+        raceId = request.form.get("raceId")
+        if raceId is not None and len(raceId.strip())!=0:
+            raceId = int(raceId)
+            #Check if the race has qualification round in the DB
+            check_query = db["Qualifying"].find({"raceId":raceId})
+            first_document = next(check_query, None)
+            if first_document is None:
+                flash(f"You sent a wrong race!")
+                return redirect(url_for('admin_operation', operation="2"))
+
+            driver_list = request.form.getlist("driverIds[]")
+            q1_list = request.form.getlist("q1[]")
+            q2_list = request.form.getlist("q2[]")
+            q3_list = request.form.getlist("q3[]")
+            position_list = request.form.getlist("position[]")
+            #Check if the input is empty
+            n = len(driver_list)
+            for i in range(0,n):
+                driverId = driver_list[i]
+                q1 = q1_list[i]
+                q2 = q2_list[i]
+                q3 = q3_list[i]
+                position = position_list[i]
+                if driverId is None or q1 is None or q2 is None or q3 is None or position is None:
+                    flash(f"You sent a wrong data!")
+                    return redirect(url_for('admin_operation', operation="2"))
+                
+                #If there is q2 time, must be q1 time
+                if len(q2.strip())!=0:
+                    if len(q1.strip())==0:
+                        flash(f"You sent a wrong qualification data!")
+                        return redirect(url_for('admin_operation', operation="2"))
+                #If there is q3 time, must be q1 time and q2 time
+                if len(q3.strip())!=0:
+                    if len(q1.strip())==0 or len(q2.strip())==0:
+                        flash(f"You sent a wrong qualification data!")
+                        return redirect(url_for('admin_operation', operation="2"))
+            
+            #Cast in integer value
+            driverId_list = [int(x) for x in driver_list]
+            positionOK_list = [int(x) for x in position_list]
+
+            for i in range(0,n):
+                position = positionOK_list[i]
+                #Check if the position is correct
+                if position<1 or position>n:
+                    flash(f"You sent a wrong qualification data!")
+                    return redirect(url_for('admin_operation', operation="2"))
+                
+                if positionOK_list.count(position)>1:
+                    flash(f"You sent a wrong qualification data!")
+                    return redirect(url_for('admin_operation', operation="2"))
+                
+            #Update qualification round
+            for i in range(0,n):
+                driverId = driverId_list[i]
+                q1 = q1_list[i]
+                q2 = q2_list[i]
+                q3 = q3_list[i]
+                position = positionOK_list[i]
+                query = {"raceId":raceId, "driverId":driverId}
+                new_values = None
+                if len(q2.strip())==0:
+                    #If there is only q1 -> update q1 and delete q2 and q3
+                    new_values = {"$set":{"q1":q1, "position":position}, "$unset": {"q2": 1, "q3": 1}}
+                    update_result = db["Qualifying"].update_one(query, new_values)
+                elif len(q3.strip())==0:
+                    #If there are q1 and q2 -> update q1 and q2 and delete q3
+                    new_values = {"$set":{"q1":q1, "q2":q2, "position":position}, "$unset": { "q3": 1}}
+                    update_result = db["Qualifying"].update_one(query, new_values)
+                else:
+                    #There are q1, q2 and q3
+                    new_values = {"$set":{"q1":q1, "q2":q2, "q3":q3, "position":position}}
+                    update_result = db["Qualifying"].update_one(query, new_values)
+
+                #Check if the update operation is successful
+                if not update_result.acknowledged and not update_result.modified_count > 0:
+                    flash(f"Error in the update operation!")
+                    return redirect(url_for('admin_operation', operation="2"))
+            
+            return redirect(url_for('load_update_qualification', race=raceId))
+        else:
+            flash(f"You sent a wrong race!")
+            return redirect(url_for('admin_operation', operation="2"))
+    else:
+        return redirect(url_for("home"))
+
 def check_session():
     if session:
         return True
