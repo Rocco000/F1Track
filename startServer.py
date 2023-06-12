@@ -1084,6 +1084,52 @@ def sort_update():
                     return render_template("update_select_race.html", races=race_list, flag=1)
                 case "qualification":
                     return render_template("update_select_race.html", races=race_list, flag=2)
+                case "race":
+                    season=int(season)
+                    result=db["Races"].aggregate([
+                        {
+                            "$match":{"year":season}
+                        },
+                        {
+                            '$project': {
+                                "raceId": "$raceId",
+                                "circuitId": "$circuitId",
+                                "name": "$name",
+                                "date": "$date",
+                                "time": "$time",
+                            }
+                        },
+                        {
+                            "$lookup":{
+                                'from':'Circuits',
+                                'localField':'circuitId',
+                                'foreignField':'circuitId',
+                                'as':'related_circuit'
+                            }
+                        },
+                        {
+                            '$unwind':'$related_circuit'
+                        },
+                        {
+                            '$project': {
+                                "raceId": "$raceId",
+                                "name": "$name",
+                                "date": "$date",
+                                "time": "$time",
+                                "name_circuits": "$related_circuit.name"
+                            }
+                        },
+                        {
+                            '$sort':{'date':1}
+                        }
+                    ])
+                    races = list()
+                    for doc in result:
+                        str_date = str(doc["date"])
+                        doc["date"] = str_date[:10]
+                        races.append(doc)
+                    circuits=db["Circuits"].find({},{"circuitId":1,"name":1})
+                    return render_template("update_race.html",races=races,circuits=circuits)
                 case _:
                     return redirect(url_for("admin_home"))
         else:
@@ -1247,6 +1293,65 @@ def update_result():
         else:
             flash(f"You missed updated points or the driver data!")
             return redirect(url_for('admin_operation', operation="2"))
+    else:
+        return redirect(url_for("home"))
+
+
+@app.route('/updateRace',methods=["GET"])
+def update_race():
+    if check_session():
+        raceId=request.args.get("race")
+        if raceId is None or len(raceId.strip())==0:
+            flash(f"Error in the update operation!")
+            return redirect(url_for('admin_operation', operation="2"))
+        raceId=int(raceId)
+        check_query=db['Races'].find({"raceId":raceId})
+        first_document = next(check_query, None)
+        if first_document is None:
+            flash(f"The race not exist!")
+            return redirect(url_for('admin_operation', operation="2"))
+        season=first_document["year"]
+        circuitId=request.args.get("circuit")
+        date=request.args.get("date")
+        time=request.args.get("time")
+        print("Data:",circuitId," ",date," ",time)
+     
+        if (circuitId is None or len(circuitId.strip())==0) and (date is None or len(date.strip())==0) and (time is None or len(time.strip())==0):
+            flash(f"You missed data for updating!")
+            return redirect(url_for('admin_operation', operation="2"))
+        if circuitId is not None and len(circuitId.strip())>0:
+            circuitId=int(circuitId)
+            check_query=db['Circuits'].find({"circuitId":circuitId})
+            first_document = next(check_query, None)
+            if first_document is None:
+                flash(f"The circuit not exist!")
+                return redirect(url_for('admin_operation', operation="2"))
+            update_query = db["Races"].update_one({"raceId":raceId},{"$set":{"circuitId":circuitId}})
+
+            #Check if the update operation is successful
+            if not(update_query.acknowledged and update_query.modified_count > 0):
+                flash(f"Error in the update operation!")
+                return redirect(url_for('admin_operation', operation="2"))
+        if date is not None and len(date.strip())>0:
+            date_format = '%Y-%m-%d'
+            date_object = datetime.strptime(date, date_format)
+            update_query = db["Races"].update_one({"raceId":raceId},{"$set":{"date":date_object}})
+
+            #Check if the update operation is successful
+            if not(update_query.acknowledged and update_query.modified_count > 0):
+                flash(f"Error in the update operation!")
+                return redirect(url_for('admin_operation', operation="2"))
+        if time is not None and len(time.strip())>0:
+            update_query = db["Races"].update_one({"raceId":raceId},{"$set":{"time":time}})
+
+            #Check if the update operation is successful
+            if not(update_query.acknowledged and update_query.modified_count > 0):
+                flash(f"Error in the update operation!")
+                return redirect(url_for('admin_operation', operation="2"))
+        app="race"
+        return redirect(url_for("sort_update",collection=app, season=season))   
+            
+
     else:
         return redirect(url_for("home"))
     
