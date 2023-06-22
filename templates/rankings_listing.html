@@ -25,6 +25,7 @@
       <table class="table">
           <thead class="thead-dark">
             <tr>
+              <th scope="col">Position</th>
               <th scope="col">Code</th>
               <th scope="col">Name</th>
               <th scope="col">Surname</th>
@@ -33,9 +34,10 @@
           </thead>
           <tbody>
             {%
-            for driver in result_chart
+            for driver in result_rankings
             %}
               <tr>
+                <td>{{driver.position}}</td>
                 <td>{{driver.code}}</td>
                 <td>{{driver.name}}</td>
                 <td>{{driver.surname}}</td>

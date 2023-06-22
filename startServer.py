@@ -44,8 +44,8 @@ def get_seasons():
         return render_template("constructors_season.html",s=years)
     elif page== "races":
         return render_template("races_page.html", s=years)
-    elif page== "charts":
-        return render_template("charts_season.html", s=years)
+    elif page== "rankings":
+        return render_template("rankings_season.html", s=years)
     else:
         return render_template("index.html")
 
@@ -194,8 +194,8 @@ def get_circuits():
     result = db["Circuits"].find()
     return render_template("circuits_page.html", result_circuits=result)
 
-@app.route('/getCharts')
-def get_charts():
+@app.route('/getRankings')
+def get_rankings():
     season = int(request.args.get("year"))
     result =db["Races"].aggregate([
         {
@@ -264,6 +264,7 @@ def get_charts():
         } 
     ])
     result_list = list()
+    position=1
     for doc in result:
         name = doc["_id"]["name"]
         surname=doc["_id"]["surname"]
@@ -271,8 +272,9 @@ def get_charts():
         if "code" in doc["_id"]:
             code=doc["_id"]["code"]
         points=doc["totalPoints"]
-        result_list.append({'code': code, 'name': name, 'surname': surname, 'points': points})
-    return render_template("chart_listing.html",result_chart=result_list)
+        result_list.append({'position':position,'code': code, 'name': name, 'surname': surname, 'points': points})
+        position+=1
+    return render_template("rankings_listing.html",result_rankings=result_list)
 
 @app.route('/getRaces', methods=["GET"])
 def get_races():
@@ -1360,9 +1362,8 @@ def update_race():
 @app.route('/sortDelete',methods=["GET"])
 def sort_delete():
     if check_session():
-        collection = request.args.get("collection")
         season = request.args.get("season")
-        app_list = list((collection, season))
+        app_list = list((season))
         if check_string(app_list):
             #Check if the season is in the DB
             check_query = db["Seasons"].find({"year":int(season)})
@@ -1374,11 +1375,7 @@ def sort_delete():
             race_list = list()
             for doc in race_result:
                 race_list.append({"raceId":doc["raceId"], "name":doc["name"]})
-            match collection:
-                case "race":
-                    return render_template("delete_race.html",races=race_list)
-                case _:
-                    return redirect(url_for("admin_home"))
+            return render_template("delete_race.html",races=race_list)
         else:
             flash(f"You missed data in the delete section!")
             return redirect(url_for('admin_operation', operation="3"))

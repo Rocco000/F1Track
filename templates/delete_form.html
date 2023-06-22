@@ -59,14 +59,9 @@
     <div class="background-image">
         <div class="container">
             <div class="form-container">
-                <h2>What do you want to delete into the database?</h2>
+                <h2>In which season do you want to delete a race?</h2>
                 <form action="/sortDelete" method="GET">
                     <div class="form-group">
-                        <label for="collection">Select the document type:</label>
-                        <select class="form-control" id="collection" name="collection">
-                            <option value="race">Race</option>
-                            <!--<option value="qualification">Qualification</option>-->
-                        </select>
                         <label for="season">Select the season:</label>
                         <select class="form-control" id="season" name="season">
                             {%for year in seasons%}
