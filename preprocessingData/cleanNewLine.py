@@ -2,7 +2,7 @@ import pandas as pd
 
 def remove_field_from_rows(csv_file, columns, output_file):
     df = pd.read_csv("./preprocessingData/originalData/"+csv_file)
-    # Sostituisci \N con "" nelle colonne specificate
+    # Sostituisce \N con "" nelle colonne specificate
     df[columns] = df[columns].replace(r'\\N', '', regex=True)
     df.to_csv("./preprocessingData/cleanedData/"+output_file, index=False)
 
@@ -13,3 +13,6 @@ fields = str(input("Inserisci i campi:\n"))
 fields = fields.split(',')
 
 remove_field_from_rows(input_file, fields, output_file)
+
+
+
