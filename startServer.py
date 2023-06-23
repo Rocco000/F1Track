@@ -1018,11 +1018,14 @@ def insert_result():
         raceId=request.args.get("race")
         driverId=request.args.get("driver")
         constructorId=request.args.get("constructor")
+
+        #Check if this result already exists
         check_validity=db["Results"].find({'raceId':int(raceId), 'driverId':int(driverId)},{})
         first_document = next(check_validity, None)
         if first_document is not None:
             flash(f"This result already exist!")
             return redirect(url_for('admin_operation', operation="1")) 
+        
         carNumber=request.args.get("car-number")
         grid=request.args.get("grid")
         position=request.args.get("position")
@@ -1035,25 +1038,76 @@ def insert_result():
         fastestLapSpeed=request.args.get("fastest-lap-speed")
         status=request.args.get("status")
 
-        app_list=list((raceId,driverId,grid,position,positionText,points,laps,time,fastestLap,fastestLapTime,fastestLapSpeed,status))
+        #Check if the required fields are not null or empty string
+        app_list=list((raceId,driverId,grid,positionText,points,laps,status))
         if check_string(app_list):
             raceId=int(raceId)
             driverId=int(driverId)
             constructorId=int(constructorId)
             grid=int(grid)
-            position=int(position)
-            if positionText.isdigit:
-                positionText=int(positionText)
             points=int(points)
             laps=int(laps)
-            fastestLap=int(fastestLap)
             status=int(status)
-            if carNumber is None or len(carNumber.strip())==0:
-                insert_result=db["Results"].insert_one({"resultId": resultId, "raceId": raceId, "driverId": driverId, "constructorId": constructorId, "grid": grid, "position": position, "positionText": positionText, "points": points, "laps": laps, "time": time, "fastestLap": fastestLap, "fastestLapTime": fastestLapTime, "fastestLapSpeed": fastestLapSpeed, "statusId": status})
+
+            query = {"resultId": resultId, "raceId": raceId, "driverId": driverId, "constructorId": constructorId, "grid": grid, "points": points, "laps": laps, "statusId": status}
+
+            if carNumber is not None and len(carNumber.strip())!=0:
+                query["carNumber"] = int(carNumber)
+
+            #Check if position value is not null or empty string
+            if position is not None and len(position.strip())!=0:
+                position=int(position)
+                
+                #Check if the positionText has the same value
+                if positionText.isnumeric():
+                    positionText = int(positionText)
+                else:
+                    flash(f"Insert NOT done! The position and positionText are not equal.")
+                    return redirect(url_for('admin_operation', operation="1"))
+                
+                if position!=positionText:
+                    flash(f"Insert NOT done! The position and positionText are not equal.")
+                    return redirect(url_for('admin_operation', operation="1"))
+                else:
+                    #Add in the query the 2 fields
+                    query["position"] = position
+                    query["positionText"] = positionText
             else:
-                insert_result=db["Results"].insert_one({"resultId": resultId, "raceId": raceId, "driverId": driverId, "constructorId": constructorId, "carNumber":carNumber, "grid": grid, "position": position, "positionText": positionText, "points": points, "laps": laps, "time": time, "fastestLap": fastestLap, "fastestLapTime": fastestLapTime, "fastestLapSpeed": fastestLapSpeed, "statusId": status})
+                #There is positionText and not the position
+                query["positionText"] = positionText
+            
+
+            if time is not None and len(time.strip())!=0:
+                query["time"] = time
+
+            if fastestLap is not None and len(fastestLap.strip())!=0:
+                fastestLap_int = int(fastestLap)
+                if fastestLap_int<=laps:
+                    query["fastestLap"] = fastestLap_int
+                else:
+                    flash(f"Insert NOT done! You sent a fastest lap number greater than the number of laps done.")
+                    return redirect(url_for('admin_operation', operation="1"))
+            
+            if fastestLapTime is not None and len(fastestLapTime.strip())!=0:
+
+                #If pastestLapTime is ok but fastestLap is empty -> error
+                if fastestLap is None or len(fastestLap.strip())==0:
+                    flash(f"Insert NOT done! You sent the time of the fastest lap but not the fastest lap number.")
+                    return redirect(url_for('admin_operation', operation="1"))
+                else:
+                    query["fastestLapTime"] = fastestLapTime
+
+            if fastestLapSpeed is not None and len(fastestLapSpeed.strip())!=0:
+                #If pastestLapTime is ok but fastestLap is empty -> error
+                if fastestLap is None or len(fastestLap.strip())==0:
+                    flash(f"Insert NOT done! You sent the speed of the fastest lap but not the fastest lap number.")
+                    return redirect(url_for('admin_operation', operation="1"))
+                else:
+                    query["fastestLapSpeed"] = fastestLapSpeed
+            
+            insert_result=db["Results"].insert_one(query)
             if insert_result.acknowledged:
-                flash(f"Race insert with success!")
+                flash(f"Result insert with success!")
             else:
                 flash(f"Insert NOT done!")
             return redirect(url_for('admin_operation', operation="1"))
