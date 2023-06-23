@@ -954,13 +954,20 @@ def insert_race():
         date=request.args.get("race-date")
         time=request.args.get("race-time")
         url=request.args.get("url")
-        app_list=list((year,circuitId,name,date,time))
+        app_list=list((year,circuitId,name,date))
         if check_string(app_list):
             year=int(year)
             circuitId=int(circuitId)
             date_format = '%Y-%m-%d'
             date= datetime.strptime(date, date_format)
             raceId=get_max_field_value(db["Races"],"raceId")+1
+            #check that race name and date is not contained in another race of the same season 
+            check_validity=db["Races"].find({'year':year,'$or':[{'name':name}, {'date':date}]})
+            first_document = next(check_validity, None)
+            if first_document is not None:
+                flash(f"This race name already exist or you are trying to insert two races in the same date!")
+                return redirect(url_for('admin_operation', operation="1"))
+            
             race_number_result=db["Races"].aggregate([
                 {
                     '$match': {'year':year}
@@ -979,10 +986,12 @@ def insert_race():
             ])
             for doc in race_number_result:
                 raceNumber=doc["max_value"]+1
-            if url is None or len(url.strip())==0:
-                insert_result=db["Races"].insert_one({"raceId": raceId, "year": year, "raceNumber": raceNumber, "circuitId": circuitId, "name": name, "date":date ,"time": time})
-            else:
-                insert_result=db["Races"].insert_one({"raceId": raceId, "year": year, "raceNumber": raceNumber, "circuitId": circuitId, "name": name, "date":date ,"time": time,"url": url})
+            to_insert={"raceId": raceId, "year": year, "raceNumber": raceNumber, "circuitId": circuitId, "name": name, "date":date}
+            if not(time is None or len(time.strip())==0):
+                to_insert['time']=time
+            if not(url is None or len(url.strip())==0):
+                to_insert["url"]=url
+            insert_result=db["Races"].insert_one(to_insert)
             if insert_result.acknowledged:
                 flash(f"Race insert with success!")
             else:
@@ -1370,11 +1379,11 @@ def update_race():
         circuitId=request.args.get("circuit")
         date=request.args.get("date")
         time=request.args.get("time")
-        print("Data:",circuitId," ",date," ",time)
      
         if (circuitId is None or len(circuitId.strip())==0) and (date is None or len(date.strip())==0) and (time is None or len(time.strip())==0):
             flash(f"You missed data for updating!")
             return redirect(url_for('admin_operation', operation="2"))
+        to_update=dict()
         if circuitId is not None and len(circuitId.strip())>0:
             circuitId=int(circuitId)
             check_query=db['Circuits'].find({"circuitId":circuitId})
@@ -1382,28 +1391,30 @@ def update_race():
             if first_document is None:
                 flash(f"The circuit not exist!")
                 return redirect(url_for('admin_operation', operation="2"))
-            update_query = db["Races"].update_one({"raceId":raceId},{"$set":{"circuitId":circuitId}})
+            to_update['circuitId']=circuitId
 
-            #Check if the update operation is successful
-            if not(update_query.acknowledged and update_query.modified_count > 0):
-                flash(f"Error in the update operation!")
-                return redirect(url_for('admin_operation', operation="2"))
         if date is not None and len(date.strip())>0:
             date_format = '%Y-%m-%d'
             date_object = datetime.strptime(date, date_format)
-            update_query = db["Races"].update_one({"raceId":raceId},{"$set":{"date":date_object}})
-
-            #Check if the update operation is successful
-            if not(update_query.acknowledged and update_query.modified_count > 0):
-                flash(f"Error in the update operation!")
+            year=date_object.year
+            if year!=season:
+                flash(f"Date not valid!")
                 return redirect(url_for('admin_operation', operation="2"))
+            check_validity=db["Races"].find({'year':season,'date':date_object})
+            first_document = next(check_validity, None)
+            if first_document is not None:
+                flash(f"There is already another race in the same date!")
+                return redirect(url_for('admin_operation', operation="2"))
+            to_update['date']=date_object
+
         if time is not None and len(time.strip())>0:
-            update_query = db["Races"].update_one({"raceId":raceId},{"$set":{"time":time}})
+            to_update['time']=time
+        update_query = db["Races"].update_one({"raceId":raceId},{"$set":to_update})
 
-            #Check if the update operation is successful
-            if not(update_query.acknowledged and update_query.modified_count > 0):
-                flash(f"Error in the update operation!")
-                return redirect(url_for('admin_operation', operation="2"))
+        #Check if the update operation is successful
+        if not(update_query.acknowledged and update_query.modified_count > 0):
+            flash(f"Error in the update operation!")
+            return redirect(url_for('admin_operation', operation="2"))
         app="race"
         return redirect(url_for("sort_update",collection=app, season=season))   
             
