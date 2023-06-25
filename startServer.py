@@ -127,7 +127,6 @@ def get_drivers_season():
 @app.route('/getConstructors')
 def get_constructors():
     season = int(request.args.get("year"))
-    print("Season: ",season)
     result=db['Races'].aggregate([
         {
             '$match':{
