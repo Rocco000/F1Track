@@ -39,23 +39,11 @@
             height: 100vh;
         }
     </style>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <script>
-                alert("{{ messages[0] }}");
-            </script>
-        {% endif %}
-    {% endwith %}
-
     <!--Bootstrap css-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    {%if session%}
-        {%include 'admin_navbar.html'%}
-    {%else%}
-        {%include 'navbar.html'%}
-    {%endif%}
+    {%include 'admin_navbar.html'%}
     <div class="background-image">
         <div class="container">
             <div class="form-container">

@@ -16,7 +16,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    {% include 'navbar.html' %}
+  {%if session%}
+    {%include 'admin_navbar.html'%}
+  {%else%}
+    {%include 'navbar.html'%}
+  {%endif%}
     <div class="container" style="margin-top: 20px;">
       <table class="table">
           <thead class="thead-dark">
@@ -33,7 +37,7 @@
                 <tr>
                 <td>{{constructor.name}}</td>
                 <td>{{constructor.nationality}}</td>
-                <td><a href="/{{constructor.url}}">click_to_info</a></td>
+                <td><a href="{{constructor.url}}">click_to_info</a></td>
                 </tr>
             {%
             endfor

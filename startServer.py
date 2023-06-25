@@ -628,21 +628,11 @@ def login():
 def login_check():
     username= str(request.form.get("username"))
     password= str(request.form.get("password"))
-    result=db["Users"].aggregate([
-        {
-            '$match':{'username':username}
-        },
-        {
-            '$match': {'password':password}
-        },
-        {
-            '$project':{
-                'username':'$username',
-                'password':'$password'
-            }
-        }
-    ])
-    if result.alive:
+    if (username is None or len(username.strip())==0) or (password is None or len(password.strip())==0):
+        return redirect(url_for('login'))
+    result=db["Users"].find({'username': username, 'password':password})
+    first_document = next(result, None)
+    if first_document is not None:
         session['username'] = username
         return redirect(url_for('admin_home'))
     return render_template("login.html")
@@ -721,7 +711,7 @@ def sort_insert():
             case _:
                 return redirect(url_for("admin_home"))
     else:
-        redirect(url_for("home"))
+        return redirect(url_for("home"))
 
 @app.route('/insertDriver', methods=["GET"])
 def insert_driver():
