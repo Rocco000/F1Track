@@ -959,6 +959,13 @@ def insert_race():
             date_format = '%Y-%m-%d'
             date= datetime.strptime(date, date_format)
             raceId=get_max_field_value(db["Races"],"raceId")+1
+
+            #Check the date
+            anno=date.year
+            if anno!=year:
+                flash(f"Date not valid!")
+                return redirect(url_for('admin_operation', operation="1"))
+
             #check that race name and date is not contained in another race of the same season 
             check_validity=db["Races"].find({'year':year,'$or':[{'name':name}, {'date':date}]})
             first_document = next(check_validity, None)
