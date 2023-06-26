@@ -882,11 +882,20 @@ def insert_qualify():
         q3 = request.args.get("q3")
         app_list = list((driverId, constructorId, raceId, position, q1))
         if check_string(app_list):
+            #Check if the qualification for a certain driver already exists
             result_check = db["Qualifying"].find({"driverId":int(driverId), "raceId":int(raceId)})
             result = list(result_check)
             if len(result)>0:
                 flash(f"There is already a qualification round for this driver in this race!")
                 return redirect(url_for('admin_operation', operation="1"))
+            
+            #Check if the qualification position is already taken up by another driver
+            result_check = db["Qualifying"].find({"raceId":int(raceId), "position":int(position)})
+            result = list(result_check)
+            if len(result)>0:
+                flash(f"The qualification position is wrong!")
+                return redirect(url_for('admin_operation', operation="1"))
+
             #User inserts the need fields
             max_id=get_max_field_value(db["Qualifying"],"qualifyId")+1
             insert_result = None
@@ -1023,7 +1032,7 @@ def insert_result():
         if first_document is not None:
             flash(f"This result already exist!")
             return redirect(url_for('admin_operation', operation="1")) 
-        
+
         carNumber=request.args.get("car-number")
         grid=request.args.get("grid")
         position=request.args.get("position")
@@ -1067,11 +1076,22 @@ def insert_result():
                     flash(f"Insert NOT done! The position and positionText are not equal.")
                     return redirect(url_for('admin_operation', operation="1"))
                 else:
+                    #Check if the position is already taken up by another driver
+                    check_position_grid = db["Results"].find({"raceId":raceId, '$or':[{"position":position}, {"grid":grid}]})
+                    first_document = next(check_position_grid, None)
+                    if first_document is not None:
+                        flash(f"Insert NOT done! The final position or grid position is wrong.")
+                        return redirect(url_for('admin_operation', operation="1"))
+                    
                     #Add in the query the 2 fields
                     query["position"] = position
                     query["positionText"] = positionText
             else:
                 #There is positionText and not the position
+                #Check that it is only a string not a number
+                if positionText.isnumeric():
+                    flash(f"Insert NOT done! The position text is wrong.")
+                    return redirect(url_for('admin_operation', operation="1"))                    
                 query["positionText"] = positionText
             
 
